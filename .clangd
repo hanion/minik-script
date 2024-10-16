@@ -1,0 +1,13 @@
+CompileFlags:
+  Add: [-Iinclude, -Isrc]
+
+CompileCommands: build/compile_commands.json
+
+Index:
+  Background: true
+
+Diagnostics:
+  ClangTidy: true
+
+Fallback:
+  Enabled: true
