@@ -1,13 +1,10 @@
 CompileFlags:
   Add: [-Iinclude, -Isrc]
-
-CompileCommands: build/compile_commands.json
+  CompilationDatabase: "build"
+  Compiler: g++
 
 Index:
-  Background: true
+  Background: Build
 
 Diagnostics:
-  ClangTidy: true
-
-Fallback:
-  Enabled: true
+  UnusedIncludes: None
