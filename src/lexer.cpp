@@ -8,22 +8,22 @@
 namespace minik {
 
 const std::map<std::string, TokenType> Lexer::keywords = {
-    {"and",    AND},
-    {"class",  CLASS},
-    {"else",   ELSE},
-    {"false",  FALSE},
-    {"for",    FOR},
-    {"fun",    FUN},
-    {"if",     IF},
-    {"nil",    NIL},
-    {"or",     OR},
-    {"print",  PRINT},
-    {"return", RETURN},
-    {"super",  SUPER},
-    {"this",   THIS},
-    {"true",   TRUE},
-    {"var",    VAR},
-    {"while",  WHILE}
+	{"and",    AND},
+	{"class",  CLASS},
+	{"else",   ELSE},
+	{"false",  FALSE},
+	{"for",    FOR},
+	{"fun",    FUN},
+	{"if",     IF},
+	{"nil",    NIL},
+	{"or",     OR},
+	{"print",  PRINT},
+	{"return", RETURN},
+	{"super",  SUPER},
+	{"this",   THIS},
+	{"true",   TRUE},
+	{"var",    VAR},
+	{"while",  WHILE}
 };
 
 
@@ -87,7 +87,7 @@ void Lexer::scan_token() {
 	}
 }
 
-bool Lexer::is_at_end() {
+bool Lexer::is_at_end() const {
 	return m_current >= m_source.length();
 }
 char Lexer::advance() {
@@ -107,11 +107,11 @@ bool Lexer::match(char expected) {
 	m_current++;
 	return true;
 }
-char Lexer::peek() {
+char Lexer::peek() const {
 	if (is_at_end()) { return '\0'; }
 	return m_source.at(m_current);
 }
-char Lexer::peek_next() {
+char Lexer::peek_next() const {
 	if (m_current + 1 >= m_source.length()) { return '\0'; }
 	return m_source.at(m_current + 1);
 }
@@ -139,7 +139,7 @@ void Lexer::string() {
 }
 
 
-bool Lexer::is_digit(char c) {
+bool Lexer::is_digit(char c) const {
 	return c >= '0' && c <= '9';
 }
 
@@ -161,7 +161,7 @@ void Lexer::number() {
 }
 
 
-bool Lexer::is_alpha(char c) {
+bool Lexer::is_alpha(char c) const {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
@@ -180,7 +180,11 @@ void Lexer::identifier() {
 	add_token(type);
 }
 
-std::string Lexer::substr(int start, int end) {
+bool Lexer::is_alpha_numeric(char c) const {
+	return is_alpha(c) || is_digit(c);
+}
+
+std::string Lexer::substr(int start, int end) const {
 	return m_source.substr(start, (end-start));
 }
 

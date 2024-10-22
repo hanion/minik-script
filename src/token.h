@@ -88,7 +88,7 @@ public:
 		: type(type), lexeme(lexeme), literal(literal), line(line) {}
 
 
-	std::string to_string() {
+	std::string to_string() const {
 		if (literal.d != 0.0) {
 			return token_type_to_string(type) + " " + lexeme + " " + std::to_string(literal.d);
 		}

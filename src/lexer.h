@@ -16,7 +16,7 @@ public:
 	std::vector<Token>& scan_tokens();
 
 private:
-	bool is_at_end();
+	bool is_at_end() const;
 	char advance();
 	void add_token(TokenType type);
 	void add_token(TokenType type, Literal literal);
@@ -24,20 +24,20 @@ private:
 	void scan_token();
 
 	bool match(char expected);
-	char peek();
-	char peek_next();
+	char peek() const;
+	char peek_next() const;
 
 	void string();
 
-	bool is_digit(char c);
+	bool is_digit(char c) const;
 	void number();
 
-	bool is_alpha(char c);
+	bool is_alpha(char c) const;
 	void identifier();
 
-	bool is_alpha_numeric(char c) { return is_alpha(c) || is_digit(c); }
+	bool is_alpha_numeric(char c) const;
 
-	inline std::string substr(int start, int end);
+	inline std::string substr(int start, int end) const;
 
 private:
 	std::string m_source;
