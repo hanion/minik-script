@@ -135,7 +135,7 @@ void Lexer::string() {
 
 	// trim the surrounding quotes
 	std::string value = substr(m_start + 1, m_current - 1);
-	add_token(STRING, {.s = value});
+	add_token(STRING, {value});
 }
 
 
@@ -157,7 +157,7 @@ void Lexer::number() {
 		}
 	}
 
-	add_token(NUMBER, { .d = std::stod(substr(m_start, m_current)) });
+	add_token(NUMBER, { std::stod(substr(m_start, m_current)) });
 }
 
 
