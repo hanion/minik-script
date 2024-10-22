@@ -1,5 +1,7 @@
 #include "minik.h"
 #include "lexer.h"
+#include "parser.h"
+#include "ast_printer.cpp"
 
 #include <cstdlib>
 #include <fstream>
@@ -12,8 +14,18 @@ static bool had_error = false;
 
 void run(const std::string& source) {
 	MN_LOG("run: %s", source.c_str());
-	Lexer l = Lexer(source);
-	l.scan_tokens();
+
+	Lexer lexer = Lexer(source);
+	std::vector<Token>& tokens = lexer.scan_tokens();
+	Parser parser = Parser(tokens);
+	Ref<Expression> expression = parser.parse();
+
+	if (had_error) {
+		return;
+	}
+
+	AstPrinter printer;
+	printer.print(expression);
 }
 
 void run_file(const std::string& filename) {
@@ -55,7 +67,7 @@ void run_prompt() {
 
 void report_error(int line, const std::string& message) {
 	had_error = true;
-	MN_ERROR("! %d, %s ", line, message.c_str());
+	MN_ERROR("! %d, %s", line, message.c_str());
 }
 
 }

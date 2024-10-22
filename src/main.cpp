@@ -3,9 +3,12 @@
 
 
 int main(int argc, char* argv[]) {
+#if 0
 	// NOTE: for debug:
 	minik::run_file("../test.mn");
 	return 0;
+#endif
+
 	if (argc > 2) {
 		MN_ERROR("Usage: %s [script.mn]", argv[0]);
 		return 64;
