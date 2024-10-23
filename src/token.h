@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base.h"
+#include "object.h"
 #include <string>
 #include <variant>
 
@@ -72,36 +73,7 @@ const static std::string token_type_to_string(TokenType type) {
 }
 
 
-struct Literal {
-	std::variant<double, std::string> value;
-
-	bool is_double() const { return std::holds_alternative<double>(value); }
-	bool is_string() const { return std::holds_alternative<std::string>(value); }
-
-	bool is_empty() const {
-		if (is_double()) {
-			return (std::get<double>(value) == 0);
-		}
-		if (is_string()) {
-			return (std::get<std::string>(value).empty());
-		}
-		return true;
-	}
-
-	std::string to_string() const {
-		if (is_empty()) {
-			return "";
-		}
-		if (is_double()) {
-			return std::to_string(std::get<double>(value));
-		}
-		if (is_string()) {
-			return std::get<std::string>(value);
-		}
-		return "";
-	}
-};
-
+struct Literal : Object {};
 
 class Token {
 public:

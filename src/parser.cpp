@@ -117,9 +117,9 @@ Ref<Expression> Parser::unary() {
 }
 
 Ref<Expression> Parser::primary() {
-	if (match(FALSE)) { return CreateRef<LiteralExpression>(Literal{0.0}); }
-	if (match(TRUE))  { return CreateRef<LiteralExpression>(Literal{1.0}); }
-	if (match(NIL))   { return CreateRef<LiteralExpression>(Literal{}); }
+	if (match(FALSE)) { return CreateRef<LiteralExpression>(Literal{false}); }
+	if (match(TRUE))  { return CreateRef<LiteralExpression>(Literal{true}); }
+	if (match(NIL))   { return CreateRef<LiteralExpression>(Literal{nullptr}); }
 
 	if (match(NUMBER) || match(STRING)) {
 		return CreateRef<LiteralExpression>(previous().literal);
