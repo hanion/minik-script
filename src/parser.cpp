@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "exception.h"
 #include "minik.h"
 #include "statement.h"
 #include "token.h"

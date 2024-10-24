@@ -2,6 +2,7 @@
 
 #include "base.h"
 #include <cstddef>
+#include <exception>
 #include <variant>
 
 namespace minik {

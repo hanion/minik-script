@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "exception.h"
 
 namespace minik {
 

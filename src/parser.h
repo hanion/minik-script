@@ -45,21 +45,6 @@ private:
 };
 
 
-class ParseException : public std::exception {
-public:
-	const std::string msg;
-	const Token token;
-	ParseException(const Token& token, const std::string& message) : msg(message), token(token) {
-		if (token.type == MEOF) {
-			report_error(token.line, msg);
-		} else {
-			report_error(token.line, message + " at: '" + token.lexeme + "'.");
-		}
-	}
-	virtual const char* what() const noexcept override { return msg.c_str(); }
-};
-
-void report_parse_error(const ParseException& e);
 
 
 }

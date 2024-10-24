@@ -1,4 +1,5 @@
 #include "minik.h"
+#include "exception.h"
 #include "interpreter.h"
 #include "lexer.h"
 #include "parser.h"

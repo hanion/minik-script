@@ -35,20 +35,5 @@ private:
 	Object result;
 };
 
-
-class InterpreterException : public std::exception {
-public:
-	const Token token;
-	const Object object;
-	const std::string msg;
-	InterpreterException(const Token& token, const Object& object, const std::string& message)
-		: token(token), object(object), msg(message) {
-		report_error(token.line, msg + " at: '" + object.to_string() + "'.");
-	}
-	virtual const char* what() const noexcept override { return msg.c_str(); }
-};
-
-void report_runtime_error(const InterpreterException& e);
-
 }
 
