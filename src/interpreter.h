@@ -1,0 +1,54 @@
+#pragma once
+
+#include "expression.h"
+#include "minik.h"
+#include "object.h"
+#include "statement.h"
+#include <vector>
+
+namespace minik {
+
+class Interpreter : public Visitor {
+public:
+	virtual void visit(const LiteralExpression& literal)   override;
+	virtual void visit(const BinaryExpression& binary)     override;
+	virtual void visit(const UnaryExpression& unary)       override;
+	virtual void visit(const GroupingExpression& grouping) override;
+
+	virtual void visit(const ExpressionStatement& s) override;
+	virtual void visit(const PrintStatement& s)      override;
+
+	void interpret(const std::vector<Ref<Statement>>& statements);
+
+private:
+	Object visit(const Ref<Expression>& expression) {
+		expression->accept(*this);
+		return result;
+	}
+
+	Object evaluate(const Ref<Expression>& expression);
+	bool is_truthy(const Token& token, const Object& object) const;
+	bool is_equal(const Object& a, const Object& b) const;
+	void execute(const Ref<Statement>& statement);
+
+private:
+	Object result;
+};
+
+
+class InterpreterException : public std::exception {
+public:
+	const Token token;
+	const Object object;
+	const std::string msg;
+	InterpreterException(const Token& token, const Object& object, const std::string& message)
+		: token(token), object(object), msg(message) {
+		report_error(token.line, msg + " at: '" + object.to_string() + "'.");
+	}
+	virtual const char* what() const noexcept override { return msg.c_str(); }
+};
+
+void report_runtime_error(const InterpreterException& e);
+
+}
+

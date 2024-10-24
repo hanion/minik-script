@@ -1,7 +1,9 @@
 #include "minik.h"
+#include "interpreter.h"
 #include "lexer.h"
 #include "parser.h"
 #include "ast_printer.cpp"
+#include "statement.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -10,22 +12,21 @@
 namespace minik {
 
 static bool had_error = false;
+static bool had_runtime_error = false;
 
 
 void run(const std::string& source) {
-	MN_LOG("run: %s", source.c_str());
-
 	Lexer lexer = Lexer(source);
 	std::vector<Token>& tokens = lexer.scan_tokens();
 	Parser parser = Parser(tokens);
-	Ref<Expression> expression = parser.parse();
+	std::vector<Ref<Statement>> statements = parser.parse();
 
 	if (had_error) {
 		return;
 	}
 
-	AstPrinter printer;
-	printer.print(expression);
+	Interpreter interpreter;
+	interpreter.interpret(statements);
 }
 
 void run_file(const std::string& filename) {
@@ -41,6 +42,9 @@ void run_file(const std::string& filename) {
 
 		if (had_error) {
 			exit(65);
+		}
+		if (had_runtime_error) {
+			exit(70);
 		}
 	}
 
@@ -67,7 +71,15 @@ void run_prompt() {
 
 void report_error(int line, const std::string& message) {
 	had_error = true;
-	MN_ERROR("! %d, %s", line, message.c_str());
+	MN_ERROR("! Error [line %d], %s", line, message.c_str());
+}
+
+void report_parse_error(const ParseException& e) {
+	had_error = true;
+}
+
+void report_runtime_error(const InterpreterException& e) {
+	had_runtime_error = true;
 }
 
 }

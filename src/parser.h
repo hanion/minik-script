@@ -3,6 +3,7 @@
 #include "base.h"
 #include "expression.h"
 #include "minik.h"
+#include "statement.h"
 #include "token.h"
 #include <vector>
 
@@ -12,7 +13,7 @@ class Parser {
 public:
 	Parser(const std::vector<Token>& tokens) : m_tokens(tokens) {}
 
-	Ref<Expression> parse();
+	std::vector<Ref<Statement>> parse();
 
 private:
 	bool is_at_end() const;
@@ -34,6 +35,10 @@ private:
 
 	void synchronize();
 
+	Ref<Statement> statement();
+	Ref<Statement> print_statement();
+	Ref<Statement> expression_statement();
+
 private:
 	std::vector<Token> m_tokens;
 	int m_current = 0;
@@ -43,15 +48,18 @@ private:
 class ParseException : public std::exception {
 public:
 	const std::string msg;
-	ParseException(const Token& token, const std::string& message) : msg(message) {
+	const Token token;
+	ParseException(const Token& token, const std::string& message) : msg(message), token(token) {
 		if (token.type == MEOF) {
 			report_error(token.line, msg);
 		} else {
-			report_error(token.line, "at '" + token.lexeme + "' " + message);
+			report_error(token.line, message + " at: '" + token.lexeme + "'.");
 		}
 	}
-	virtual const char* what() { return msg.c_str(); }
+	virtual const char* what() const noexcept override { return msg.c_str(); }
 };
+
+void report_parse_error(const ParseException& e);
 
 
 }

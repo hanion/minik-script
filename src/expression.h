@@ -1,24 +1,10 @@
 #pragma once
 
-#include "log.h"
 #include "token.h"
+#include "visitor.h"
 
 
 namespace minik {
-
-class LiteralExpression;
-class BinaryExpression;
-class UnaryExpression;
-class GroupingExpression;
-
-class Visitor {
-public:
-	virtual ~Visitor() = default;
-	virtual void visit(const LiteralExpression& literal)   = 0;
-	virtual void visit(const BinaryExpression& binary)     = 0;
-	virtual void visit(const UnaryExpression& unary)       = 0;
-	virtual void visit(const GroupingExpression& grouping) = 0;
-};
 
 struct Expression {
 	virtual ~Expression() = default;

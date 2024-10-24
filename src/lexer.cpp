@@ -1,5 +1,4 @@
 #include "lexer.h"
-#include "log.h"
 #include "minik.h"
 #include "token.h"
 #include <cstddef>
@@ -35,9 +34,6 @@ std::vector<Token>& Lexer::scan_tokens() {
 
 	m_tokens.emplace_back(MEOF, "", Literal{}, m_line);
 
-	for (Token t : m_tokens) {
-		MN_LOG("	%s", t.to_string().c_str());
-	}
 	return m_tokens;
 }
 

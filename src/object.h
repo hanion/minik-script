@@ -36,6 +36,23 @@ struct Object {
 		}
 		return "";
 	}
+
+	bool equals(const Object& other) const {
+		if (is_nil() && other.is_nil()) {
+			return true;
+		}
+		if (is_bool() && other.is_bool()) {
+			return (as_bool() == other.as_bool());
+		}
+		if (is_double() && other.is_double()) {
+			return (as_double() == other.as_double());
+		}
+		if (is_string() && other.is_string()) {
+			return (as_string() == other.as_string());
+		}
+
+		return false;
+	}
 };
 
 }

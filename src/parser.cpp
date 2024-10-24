@@ -1,15 +1,24 @@
 #include "parser.h"
+#include "minik.h"
+#include "statement.h"
+#include "token.h"
 
 namespace minik {
 
 
-Ref<Expression> Parser::parse() {
-	try {
-		return expression();
-	} catch (ParseException e) {
-		return nullptr;
+std::vector<Ref<Statement>> Parser::parse() {
+	std::vector<Ref<Statement>> statements;
+	
+	while (!is_at_end()) {
+		try {
+			statements.emplace_back(statement());
+		} catch (ParseException e) {
+			report_parse_error(e);
+			break;
+		}
 	}
-	return nullptr;
+
+	return statements;
 }
 
 
@@ -160,5 +169,31 @@ void Parser::synchronize() {
 		advance();
 	}
 }
+
+
+
+
+Ref<Statement> Parser::statement() {
+	if (match(PRINT)) {
+		return print_statement();
+	}
+
+	return expression_statement();
+}
+
+Ref<Statement> Parser::print_statement() {
+	Ref<Expression> value = expression();
+	consume(SEMICOLON, "Expected ';' after value.");
+	return CreateRef<PrintStatement>(value);
+}
+
+Ref<Statement> Parser::expression_statement() {
+	Ref<Expression> expr = expression();
+	consume(SEMICOLON, "Expected ';' after expression.");
+	return CreateRef<ExpressionStatement>(expr);
+}
+
+
+
 
 }
