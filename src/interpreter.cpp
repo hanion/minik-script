@@ -56,10 +56,10 @@ void Interpreter::visit(const BinaryExpression& binary) {
 	// is equals
 	switch (binary.operator_token.type) {
 		case EQUAL_EQUAL:
-			result.value = is_equal(left, right);
+			result.value = is_equal(binary.operator_token, left, right);
 			return;
 		case BANG_EQUAL:
-			result.value = !is_equal(left, right);
+			result.value = !is_equal(binary.operator_token, left, right);
 			return;
 		default:
 			break;
@@ -123,15 +123,11 @@ bool Interpreter::is_truthy(const Token& token, const Object& object) const {
 	}
 
 	throw InterpreterException(token, object, "No viable conversion to bool.");
-	return false;
 }
 
-bool Interpreter::is_equal(const Object& a, const Object& b) const {
-	if (a.is_nil() && b.is_nil()) {
-		return true;
-	}
-	if (a.is_nil()) {
-		return false;
+bool Interpreter::is_equal(const Token& token, const Object& a, const Object& b) const {
+	if (a.is_string() != b.is_string()) {
+		throw InterpreterException(token, a.is_string() ? a : b, "Cannot compare a string with a non-string type.");
 	}
 	return a.equals(b);
 }

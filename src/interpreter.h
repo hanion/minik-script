@@ -27,8 +27,8 @@ private:
 	}
 
 	Object evaluate(const Ref<Expression>& expression);
+	bool is_equal(const Token& token, const Object& a, const Object& b) const;
 	bool is_truthy(const Token& token, const Object& object) const;
-	bool is_equal(const Object& a, const Object& b) const;
 	void execute(const Ref<Statement>& statement);
 
 private:

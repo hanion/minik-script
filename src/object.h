@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base.h"
+#include "minik.h"
 #include <cstddef>
 #include <exception>
 #include <variant>
@@ -38,6 +39,20 @@ struct Object {
 		return "";
 	}
 
+	bool to_bool() const {
+		if (is_nil()) {
+			return false;
+		}
+		if (is_bool()) {
+			return as_bool();
+		}
+		if (is_double()) {
+			return (as_double() != 0.0);
+		}
+
+		return false;
+	}
+
 	bool equals(const Object& other) const {
 		if (is_nil() && other.is_nil()) {
 			return true;
@@ -51,8 +66,7 @@ struct Object {
 		if (is_string() && other.is_string()) {
 			return (as_string() == other.as_string());
 		}
-
-		return false;
+		return (to_bool() == other.to_bool());
 	}
 };
 
