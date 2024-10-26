@@ -44,6 +44,7 @@ private:
 	Ref<Statement> declaration();
 	Ref<Statement> typed_declaration();
 	std::vector<Ref<Statement>> block();
+	Ref<Statement> if_statement();
 
 private:
 	std::vector<Token> m_tokens;

@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "base.h"
 #include "exception.h"
 #include "expression.h"
 #include "minik.h"
@@ -205,6 +206,9 @@ void Parser::synchronize() {
 
 
 Ref<Statement> Parser::statement() {
+	if (match(IF)) {
+		return if_statement();
+	}
 	if (match(PRINT)) {
 		return print_statement();
 	}
@@ -271,5 +275,24 @@ std::vector<Ref<Statement>> Parser::block() {
 	return statements;
 }
 
+
+Ref<Statement> Parser::if_statement() {
+	Ref<Expression> condition = expression();
+
+	consume(LEFT_BRACE, "Expected '{' after 'if'.");
+	Ref<BlockStatement> then_branch = CreateRef<BlockStatement>(block());
+	Ref<BlockStatement> else_branch = nullptr;
+
+	if (match(ELSE)) {
+		if (match(IF)) {
+			else_branch = CreateRef<BlockStatement>(if_statement());
+		} else {
+			consume(LEFT_BRACE, "Expected '{' after 'else'.");
+			else_branch = CreateRef<BlockStatement>(block());
+		}
+	}
+
+	return CreateRef<IfStatement>(condition, then_branch, else_branch);
+}
 
 }

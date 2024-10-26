@@ -135,6 +135,19 @@ bool Interpreter::is_truthy(const Token& token, const Object& object) const {
 
 	throw InterpreterException(token, object, "No viable conversion to bool.");
 }
+bool Interpreter::is_truthy(const Object& object) const {
+	if (object.is_nil()) {
+		return false;
+	}
+	if (object.is_bool()) {
+		return object.as_bool();
+	}
+	if (object.is_double()) {
+		return object.as_double() != 0.0;
+	}
+	// TODO: throw exception ?
+	return false;
+}
 
 bool Interpreter::is_equal(const Token& token, const Object& a, const Object& b) const {
 	if (a.is_string() != b.is_string()) {
@@ -163,6 +176,14 @@ void Interpreter::visit(const VariableStatement& s) {
 
 void Interpreter::visit(const BlockStatement& s) {
 	execute_block(s.statements, CreateRef<Environment>(m_environment));
+}
+
+void Interpreter::visit(const IfStatement& s) {
+	if (is_truthy(evaluate(s.condition))) {
+		execute_block(s.then_branch->statements, CreateRef<Environment>(m_environment));
+	} else if (s.else_branch) {
+		execute_block(s.else_branch->statements, CreateRef<Environment>(m_environment));
+	}
 }
 
 void Interpreter::execute(const Ref<Statement>& statement) {

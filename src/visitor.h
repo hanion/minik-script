@@ -13,6 +13,7 @@ class ExpressionStatement;
 class PrintStatement;
 class VariableStatement;
 class BlockStatement;
+class IfStatement;
 
 class Visitor {
 public:
@@ -30,6 +31,7 @@ public:
 	virtual void visit(const PrintStatement& s) {}
 	virtual void visit(const VariableStatement& s) {}
 	virtual void visit(const BlockStatement& s) {}
+	virtual void visit(const IfStatement& s) {}
 
 };
 

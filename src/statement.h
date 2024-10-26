@@ -45,6 +45,19 @@ struct BlockStatement : public Statement {
 
 	BlockStatement(const std::vector<Ref<Statement>>& statements)
 		: statements(statements) {}
+	BlockStatement(const Ref<Statement>& statement)
+		: statements({statement}) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct IfStatement : public Statement {
+	Ref<Expression> condition;
+	Ref<BlockStatement> then_branch;
+	Ref<BlockStatement> else_branch;
+
+	IfStatement(const Ref<Expression>& condition, const Ref<BlockStatement>& then_branch, const Ref<BlockStatement>& else_branch)
+		: condition(condition), then_branch(then_branch), else_branch(else_branch) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
