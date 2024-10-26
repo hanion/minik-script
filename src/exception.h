@@ -29,6 +29,10 @@ public:
 		: token(token), object(object), msg(message) {
 		report_error(token.line, message + " at: '" + object.to_string() + "'.");
 	}
+	InterpreterException(const Token& token, const std::string& message)
+		: token(token), object({}), msg(message) {
+		report_error(token.line, message);
+	}
 	virtual const char* what() const noexcept override { return msg.c_str(); }
 };
 

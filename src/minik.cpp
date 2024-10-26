@@ -14,6 +14,7 @@ namespace minik {
 
 static bool had_error = false;
 static bool had_runtime_error = false;
+Interpreter interpreter;
 
 
 void run(const std::string& source) {
@@ -26,7 +27,6 @@ void run(const std::string& source) {
 		return;
 	}
 
-	Interpreter interpreter;
 	interpreter.interpret(statements);
 }
 

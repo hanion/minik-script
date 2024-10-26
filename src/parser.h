@@ -18,14 +18,17 @@ public:
 private:
 	bool is_at_end() const;
 	const Token& peek() const;
+	const Token& peek_next() const;
 	const Token& previous() const;
 	const Token& advance();
 	const Token& consume(TokenType type, std::string message);
 
 	bool match(TokenType type);
 	bool check(TokenType type) const;
+	bool check_next(TokenType type) const;
 
 	Ref<Expression> expression();
+	Ref<Expression> assignment();
 	Ref<Expression> equality();
 	Ref<Expression> comparison();
 	Ref<Expression> term();
@@ -38,6 +41,8 @@ private:
 	Ref<Statement> statement();
 	Ref<Statement> print_statement();
 	Ref<Statement> expression_statement();
+	Ref<Statement> declaration();
+	Ref<Statement> typed_declaration();
 
 private:
 	std::vector<Token> m_tokens;

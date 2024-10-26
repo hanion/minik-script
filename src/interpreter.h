@@ -1,5 +1,6 @@
 #pragma once
 
+#include "environment.h"
 #include "expression.h"
 #include "minik.h"
 #include "object.h"
@@ -14,9 +15,12 @@ public:
 	virtual void visit(const BinaryExpression& binary)     override;
 	virtual void visit(const UnaryExpression& unary)       override;
 	virtual void visit(const GroupingExpression& grouping) override;
+	virtual void visit(const VariableExpression& variable) override;
+	virtual void visit(const AssignmentExpression& assign) override;
 
 	virtual void visit(const ExpressionStatement& s) override;
 	virtual void visit(const PrintStatement& s)      override;
+	virtual void visit(const VariableStatement& s)   override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 
@@ -32,6 +36,7 @@ private:
 	void execute(const Ref<Statement>& statement);
 
 private:
+	Environment environment;
 	Object result;
 };
 

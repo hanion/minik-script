@@ -1,5 +1,7 @@
 #include "interpreter.h"
 #include "exception.h"
+#include "expression.h"
+#include "statement.h"
 
 namespace minik {
 
@@ -21,6 +23,15 @@ void Interpreter::visit(const LiteralExpression& literal) {
 void Interpreter::visit(const GroupingExpression& grouping) {
 	evaluate(grouping.expression);
 }
+void Interpreter::visit(const VariableExpression& variable) {
+	result = environment.get(variable.name);
+}
+void Interpreter::visit(const AssignmentExpression& assign) {
+	Object value = evaluate(assign.value);
+	environment.get(assign.name) = value;
+	result = value;
+}
+
 
 void Interpreter::visit(const UnaryExpression& unary) {
 	Object right = evaluate(unary.right);
@@ -139,6 +150,15 @@ void Interpreter::visit(const ExpressionStatement& s) {
 void Interpreter::visit(const PrintStatement& s) {
 	Object value = evaluate(s.expression);
 	MN_LOG(value.to_string().c_str());
+}
+
+void Interpreter::visit(const VariableStatement& s) {
+	Object value;
+	if (s.initializer) {
+		value = evaluate(s.initializer);
+	}
+
+	environment.define(s.name, value);
 }
 
 void Interpreter::execute(const Ref<Statement>& statement) {

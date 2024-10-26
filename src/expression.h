@@ -51,5 +51,23 @@ struct GroupingExpression : public Expression {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct VariableExpression : public Expression {
+	Token name;
+
+	VariableExpression(const Token& name)
+		: name(name) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct AssignmentExpression : public Expression {
+	Token name;
+	Ref<Expression> value;
+
+	AssignmentExpression(const Token& name, Ref<Expression> value)
+		: name(name), value(value) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
 
 }

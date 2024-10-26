@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "exception.h"
+#include "expression.h"
 #include "minik.h"
 #include "statement.h"
 #include "token.h"
@@ -12,7 +13,7 @@ std::vector<Ref<Statement>> Parser::parse() {
 	
 	while (!is_at_end()) {
 		try {
-			statements.emplace_back(statement());
+			statements.emplace_back(declaration());
 		} catch (ParseException e) {
 			report_parse_error(e);
 			break;
@@ -29,6 +30,9 @@ bool Parser::is_at_end() const {
 
 const Token& Parser::peek() const {
 	return m_tokens[m_current];
+}
+const Token& Parser::peek_next() const {
+	return m_tokens[m_current + 1];
 }
 
 const Token& Parser::previous() const {
@@ -62,11 +66,33 @@ bool Parser::check(TokenType type) const {
 	if (is_at_end()) { return false; }
 	return peek().type == type;
 }
+bool Parser::check_next(TokenType type) const {
+	if (m_current + 1 >= m_tokens.size()) { return false; }
+	return peek_next().type == type;
+}
 
 
 
 Ref<Expression> Parser::expression() {
-	return equality();
+	return assignment();
+}
+
+Ref<Expression> Parser::assignment() {
+	Ref<Expression> expr = equality();
+
+	if (match(EQUAL)) {
+		Token equals = previous();
+		Ref<Expression> value = assignment();
+
+		if (VariableExpression* var_expr = dynamic_cast<VariableExpression*>(expr.get())) {
+			Token name = var_expr->name;
+			return CreateRef<AssignmentExpression>(name, value);
+		 }
+
+		 report_error(equals.line, "Invalid assignment target."); 
+	}
+
+	return expr;
 }
 
 Ref<Expression> Parser::equality() {
@@ -135,6 +161,10 @@ Ref<Expression> Parser::primary() {
 		return CreateRef<LiteralExpression>(previous().literal);
 	}
 
+	if (match(IDENTIFIER)) {
+		return CreateRef<VariableExpression>(previous());
+	}
+
 	if (match(LEFT_PAREN)) {
 		Ref<Expression> expr = expression();
 		consume(RIGHT_PAREN, "Expect ')' after expression.");
@@ -194,6 +224,38 @@ Ref<Statement> Parser::expression_statement() {
 	return CreateRef<ExpressionStatement>(expr);
 }
 
+Ref<Statement> Parser::declaration() {
+	try {
+		if (check(IDENTIFIER)) {
+			if (check_next(COLON)) {
+				return typed_declaration();
+			}
+			if (check_next(EQUAL)) {
+				return statement();
+			}
+		}
+		return statement();
+	} catch (const ParseException& e) {
+		synchronize();
+		return nullptr;
+	}
+}
+
+Ref<Statement> Parser::typed_declaration() {
+	Token identifier = consume(IDENTIFIER, "Expected variable name.");
+
+	if (match(COLON)) {
+		// TODO: type
+	}
+
+	Ref<Expression> initializer = nullptr;
+	if (match(EQUAL) || match(COLON)) {
+		initializer = expression();
+	}
+
+	consume(SEMICOLON, "Expected ';' after declaration.");
+	return CreateRef<VariableStatement>(identifier, initializer);
+}
 
 
 

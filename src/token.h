@@ -10,6 +10,7 @@ namespace minik {
 enum TokenType {
 	LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
 	COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
+	COLON,
 
 	BANG, BANG_EQUAL,
 	EQUAL, EQUAL_EQUAL,
@@ -36,6 +37,8 @@ const static std::string token_type_to_string(TokenType type) {
 		case SEMICOLON:       return "SEMICOLON";
 		case SLASH:           return "SLASH";
 		case STAR:            return "STAR";
+
+		case COLON:           return "COLON";
 
 		case BANG:            return "BANG";
 		case BANG_EQUAL:      return "BANG_EQUAL";

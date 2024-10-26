@@ -29,4 +29,14 @@ struct PrintStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct VariableStatement : public Statement {
+	Token name;
+	Ref<Expression> initializer;
+
+	VariableStatement(const Token& name, const Ref<Expression>& initializer)
+		: name(name), initializer(initializer) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 }
