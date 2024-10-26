@@ -2,6 +2,7 @@
 
 #include "visitor.h"
 #include "expression.h"
+#include <vector>
 
 namespace minik {
 
@@ -35,6 +36,15 @@ struct VariableStatement : public Statement {
 
 	VariableStatement(const Token& name, const Ref<Expression>& initializer)
 		: name(name), initializer(initializer) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct BlockStatement : public Statement {
+	std::vector<Ref<Statement>> statements;
+
+	BlockStatement(const std::vector<Ref<Statement>>& statements)
+		: statements(statements) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };

@@ -43,6 +43,7 @@ private:
 	Ref<Statement> expression_statement();
 	Ref<Statement> declaration();
 	Ref<Statement> typed_declaration();
+	std::vector<Ref<Statement>> block();
 
 private:
 	std::vector<Token> m_tokens;

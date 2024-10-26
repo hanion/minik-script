@@ -208,6 +208,9 @@ Ref<Statement> Parser::statement() {
 	if (match(PRINT)) {
 		return print_statement();
 	}
+	if (match(LEFT_BRACE)) {
+		return CreateRef<BlockStatement>(block());
+	}
 
 	return expression_statement();
 }
@@ -257,6 +260,16 @@ Ref<Statement> Parser::typed_declaration() {
 	return CreateRef<VariableStatement>(identifier, initializer);
 }
 
+std::vector<Ref<Statement>> Parser::block() {
+	std::vector<Ref<Statement>> statements = {};
+
+	while (!check(RIGHT_BRACE) && !is_at_end()) {
+		statements.emplace_back(declaration());
+	}
+
+	consume(RIGHT_BRACE, "Expected '}' after block.");
+	return statements;
+}
 
 
 }

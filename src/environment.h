@@ -2,17 +2,22 @@
 
 #include "exception.h"
 #include "object.h"
-#include <map>
 #include <string>
+#include <unordered_map>
 
 namespace minik {
 
 class Environment {
 public:
-	std::map<std::string, Object> values = {};
+	Environment() : enclosing(nullptr) {}
+	Environment(const Ref<Environment>& enclosing) : enclosing(enclosing) {}
+
+	bool exists(const Token& name) {
+		return values.count(name.lexeme) > 0 || (enclosing && enclosing->exists(name));
+	}
 
 	void define(const Token& name, const Object& value) {
-		if (values.find(name.lexeme) != values.end()) {
+		if (exists(name)) {
 			throw InterpreterException(name, "Redefinition of '" + name.lexeme + "'.");
 		}
 		values.emplace(name.lexeme, value);
@@ -23,8 +28,16 @@ public:
 		if (it != values.end()) {
 			return it->second;
 		}
+	
+		if (enclosing) {
+			return enclosing->get(name);
+		}
+
 		throw InterpreterException(name, "Undefined variable '" + name.lexeme + "'.");
 	}
+private:
+	Ref<Environment> enclosing;
+	std::unordered_map<std::string, Object> values = {};
 };
 
 }

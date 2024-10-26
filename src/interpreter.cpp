@@ -17,19 +17,19 @@ void Interpreter::interpret(const std::vector<Ref<Statement>>& statements) {
 
 
 void Interpreter::visit(const LiteralExpression& literal) {
-	result = literal.value;
+	m_result = literal.value;
 }
 
 void Interpreter::visit(const GroupingExpression& grouping) {
 	evaluate(grouping.expression);
 }
 void Interpreter::visit(const VariableExpression& variable) {
-	result = environment.get(variable.name);
+	m_result = m_environment->get(variable.name);
 }
 void Interpreter::visit(const AssignmentExpression& assign) {
 	Object value = evaluate(assign.value);
-	environment.get(assign.name) = value;
-	result = value;
+	m_environment->get(assign.name) = value;
+	m_result = value;
 }
 
 
@@ -38,11 +38,11 @@ void Interpreter::visit(const UnaryExpression& unary) {
 
 	switch (unary.operator_token.type) {
 		case BANG:
-			result.value = !is_truthy(unary.operator_token, right);
+			m_result.value = !is_truthy(unary.operator_token, right);
 			return;
 		case MINUS:
 			if (right.is_double()) {
-				result.value = -right.as_double();
+				m_result.value = -right.as_double();
 				return;
 			}
 			throw InterpreterException(unary.operator_token, right, "Invalid argument type to unary expression.");
@@ -59,7 +59,7 @@ void Interpreter::visit(const BinaryExpression& binary) {
 
 	// string concatenation
 	if (binary.operator_token.type == PLUS && left.is_string() && right.is_string()) {
-		result.value = left.as_string() + right.as_string();
+		m_result.value = left.as_string() + right.as_string();
 		return;
 	}
 
@@ -67,10 +67,10 @@ void Interpreter::visit(const BinaryExpression& binary) {
 	// is equals
 	switch (binary.operator_token.type) {
 		case EQUAL_EQUAL:
-			result.value = is_equal(binary.operator_token, left, right);
+			m_result.value = is_equal(binary.operator_token, left, right);
 			return;
 		case BANG_EQUAL:
-			result.value = !is_equal(binary.operator_token, left, right);
+			m_result.value = !is_equal(binary.operator_token, left, right);
 			return;
 		default:
 			break;
@@ -89,28 +89,28 @@ void Interpreter::visit(const BinaryExpression& binary) {
 
 	switch (binary.operator_token.type) {
 		case PLUS:
-			result.value = l + r;
+			m_result.value = l + r;
 			return;
 		case MINUS:
-			result.value = l - r;
+			m_result.value = l - r;
 			return;
 		case STAR:
-			result.value = l * r;
+			m_result.value = l * r;
 			return;
 		case SLASH:
-			result.value = l / r;
+			m_result.value = l / r;
 			return;
 		case GREATER:
-			result.value = l > r;
+			m_result.value = l > r;
 			return;
 		case GREATER_EQUAL:
-			result.value = l >= r;
+			m_result.value = l >= r;
 			return;
 		case LESS:
-			result.value = l < r;
+			m_result.value = l < r;
 			return;
 		case LESS_EQUAL:
-			result.value = l <= r;
+			m_result.value = l <= r;
 			return;
 		default:
 			return;
@@ -119,7 +119,7 @@ void Interpreter::visit(const BinaryExpression& binary) {
 
 Object Interpreter::evaluate(const Ref<Expression>& expression) {
 	expression->accept(*this);
-	return result;
+	return m_result;
 }
 
 bool Interpreter::is_truthy(const Token& token, const Object& object) const {
@@ -158,11 +158,30 @@ void Interpreter::visit(const VariableStatement& s) {
 		value = evaluate(s.initializer);
 	}
 
-	environment.define(s.name, value);
+	m_environment->define(s.name, value);
+}
+
+void Interpreter::visit(const BlockStatement& s) {
+	execute_block(s.statements, CreateRef<Environment>(m_environment));
 }
 
 void Interpreter::execute(const Ref<Statement>& statement) {
 	statement->accept(*this);
 }
+
+void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment) {
+	const Ref<Environment> previous = m_environment;
+	try {
+		m_environment = environment;
+		for (auto& statement : statements) {
+			execute(statement);
+		}
+	} catch (...) {
+		m_environment = previous;
+		throw;
+	}
+	m_environment = previous;
+}
+
 
 }
