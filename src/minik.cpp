@@ -37,17 +37,15 @@ void run_file(const std::string& filename) {
 		return;
 	}
 
-	std::string line;
-	while (std::getline(file, line)) {
-		run(line);
+	interpreter = Interpreter();
 
-		if (had_error) {
-			exit(65);
-		}
-		if (had_runtime_error) {
-			exit(70);
-		}
-	}
+	std::string source = std::string(
+		(std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()
+	);
+	run(source);
+
+	had_error = false;
+	had_runtime_error = false;
 
 	file.close();
 }

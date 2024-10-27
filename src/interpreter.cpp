@@ -162,7 +162,7 @@ void Interpreter::visit(const ExpressionStatement& s) {
 
 void Interpreter::visit(const PrintStatement& s) {
 	Object value = evaluate(s.expression);
-	MN_LOG(value.to_string().c_str());
+	MN_PRINT(value.to_string().c_str());
 }
 
 void Interpreter::visit(const VariableStatement& s) {

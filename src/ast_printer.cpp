@@ -15,7 +15,7 @@ public:
 	}
 
 	void print(const Ref<Expression>& expression) {
-		MN_LOG(visit(expression).c_str());
+		MN_PRINT(visit(expression).c_str());
 	}
 
 private:

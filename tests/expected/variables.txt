@@ -1,0 +1,13 @@
+3.140000
+8.478000
+mystring test
+mystring
+1.000000
+2.000000
+newstr
+20.000000
+30.000000
+4.000000
+1.000000
+should give redefinition error ->
+[ERROR] ! Error [line 30], Redefinition of 'a'.

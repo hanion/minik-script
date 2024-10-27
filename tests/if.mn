@@ -1,0 +1,47 @@
+// if test
+
+// then branch
+a := 2;
+if a == 2 {
+	string := "then branch";
+	print string;
+} else if a == 1 {
+	print "else if branch";
+} else {
+	print "else branch";
+}
+
+
+// else if branch
+a = a - 1;
+if a == 2 {
+	string := "then branch";
+	print string;
+} else if a == 1 {
+	print "else if branch";
+} else {
+	print "else branch";
+}
+
+// else branch
+a = a - 1;
+if a == 2 {
+	string := "then branch";
+	print string;
+} else if a == 1 {
+	print "else if branch";
+} else {
+	print "else branch";
+}
+
+
+// if scope test
+b :: false;
+if b {
+	local_string := "local";
+} else {
+	print "should give undefined variable error ->";
+	print local_string;
+}
+
+

@@ -1,0 +1,5 @@
+then branch
+else if branch
+else branch
+should give undefined variable error ->
+[ERROR] ! Error [line 44], Undefined variable 'local_string'.

@@ -1,0 +1,6 @@
+1.100000
+2.200000
+3.000000
+2.200000
+should give undefined variable error ->
+[ERROR] ! Error [line 14], Undefined variable 'local'.

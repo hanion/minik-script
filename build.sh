@@ -2,9 +2,10 @@
 
 print_usage() {
 	echo
-	echo "Usage: $0 [--clean] [--build] [config] [target]"
+	echo "Usage: $0 [--clean] [--build] [--run-tests] [config] [target]"
 	echo "    --clean: Clean build"
 	echo "    --build: Perform the build only, without running the executable"
+	echo "    --run-tests: Run tests"
 	echo "    config: debug  | release | min"
 	echo "    target: minik-script"
 }
@@ -61,6 +62,13 @@ run_executable() {
 	./"$target"
 }
 
+run_tests() {
+	print_job "Running Tests:"
+	print_job "    ./"$target" --run-tests"
+	cd "$build_dir"
+	./"$target" --run-tests
+}
+
 elapsed_time_ms() {
 	local start=$1
 	local end=$2
@@ -104,6 +112,7 @@ print_job() {
 
 clean_build=false
 build_only=false
+run_tests=false
 configure_first=false
 config="debug"
 target="minik-script"
@@ -118,6 +127,10 @@ while [[ $# -gt 0 ]]; do
 			;;
 		--build)
 			build_only=true
+			shift
+			;;
+		--run-tests)
+			run_tests=true
 			shift
 			;;
 		debug|release|min)
@@ -180,7 +193,11 @@ build_project
 
 if [[ "$build_only" != true ]]; then
 	if [ $build_success -eq 0 ]; then
-		run_executable
+		if [[ "$run_tests" == true ]]; then
+			run_tests
+		else
+			run_executable
+		fi
 	fi
 fi
 
