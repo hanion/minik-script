@@ -24,7 +24,9 @@ public:
 	virtual void visit(const VariableStatement& s)   override;
 	virtual void visit(const BlockStatement& s)      override;
 	virtual void visit(const IfStatement& s)         override;
-	virtual void visit(const WhileStatement& s)      override;
+	virtual void visit(const ForStatement& s)        override;
+	virtual void visit(const BreakStatement& s)      override;
+	virtual void visit(const ContinueStatement& s)   override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 

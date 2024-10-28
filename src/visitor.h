@@ -15,7 +15,9 @@ class PrintStatement;
 class VariableStatement;
 class BlockStatement;
 class IfStatement;
-class WhileStatement;
+class ForStatement;
+class BreakStatement;
+class ContinueStatement;
 
 class Visitor {
 public:
@@ -35,7 +37,9 @@ public:
 	virtual void visit(const VariableStatement& s) {}
 	virtual void visit(const BlockStatement& s) {}
 	virtual void visit(const IfStatement& s) {}
-	virtual void visit(const WhileStatement& s) {}
+	virtual void visit(const ForStatement& s) {}
+	virtual void visit(const BreakStatement& s) {}
+	virtual void visit(const ContinueStatement& s) {}
 
 };
 

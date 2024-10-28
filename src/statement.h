@@ -62,13 +62,27 @@ struct IfStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
-struct WhileStatement : public Statement {
+struct ForStatement : public Statement {
+	Ref<Statement> initializer;
 	Ref<Expression> condition;
+	Ref<Expression> increment;
 	Ref<BlockStatement> body;
 
-	WhileStatement(const Ref<Expression>& condition, const Ref<BlockStatement>& body)
-		: condition(condition), body(body) {}
+	ForStatement(const Ref<Statement>& initializer, const Ref<Expression>& condition,
+			  const Ref<Expression>& increment, const Ref<BlockStatement>& body)
+		: initializer(initializer), condition(condition), increment(increment), body(body) {}
 
+	// while
+	ForStatement(const Ref<Expression>& condition, const Ref<BlockStatement>& body)
+		: initializer(nullptr), condition(condition), increment(nullptr), body(body) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct BreakStatement : public Statement {
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+struct ContinueStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 

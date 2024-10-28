@@ -40,4 +40,11 @@ public:
 void report_parse_error(const ParseException& e);
 void report_runtime_error(const InterpreterException& e);
 
+
+
+
+struct BreakException {};
+struct ContinueException {};
+
+
 }

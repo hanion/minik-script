@@ -203,10 +203,31 @@ void Interpreter::visit(const IfStatement& s) {
 	}
 }
 
-void Interpreter::visit(const WhileStatement& s) {
-	while (is_truthy(evaluate(s.condition))) {
-		execute_block(s.body->statements, CreateRef<Environment>(m_environment));
+void Interpreter::visit(const ForStatement& s) {
+	try {
+		if (s.initializer) {
+			execute(s.initializer);
+		}
+		while (is_truthy(evaluate(s.condition))) {
+			try {
+				execute_block(s.body->statements, CreateRef<Environment>(m_environment));
+			} catch (ContinueException) {
+				// handles continue by ending execution of the block, jumping to the increment
+			}
+			if (s.increment) {
+				evaluate(s.increment);
+			}
+		}
+	} catch (BreakException) {
+		// handles break by stopping execution of the loop
 	}
+}
+
+void Interpreter::visit(const BreakStatement& s) {
+	throw BreakException();
+}
+void Interpreter::visit(const ContinueStatement& s) {
+	throw ContinueException();
 }
 
 void Interpreter::execute(const Ref<Statement>& statement) {

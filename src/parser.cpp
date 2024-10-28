@@ -230,6 +230,12 @@ void Parser::synchronize() {
 
 
 Ref<Statement> Parser::statement() {
+	if (match(BREAK)) {
+		return break_statement();
+	}
+	if (match(CONTINUE)) {
+		return continue_statement();
+	}
 	if (match(FOR)) {
 		return for_statement();
 	}
@@ -331,7 +337,7 @@ Ref<Statement> Parser::while_statement() {
 	consume(LEFT_BRACE, "Expected '{' after 'while'.");
 	Ref<BlockStatement> body = block_statement();
 
-	return CreateRef<WhileStatement>(condition, body);
+	return CreateRef<ForStatement>(condition, body);
 }
 
 Ref<Statement> Parser::for_statement() {
@@ -346,6 +352,9 @@ Ref<Statement> Parser::for_statement() {
 	if (!check(SEMICOLON)) {
 		condition = expression();
 	}
+	if (condition == nullptr) {
+		condition = CreateRef<LiteralExpression>(Literal{true});
+	}
 
 	consume(SEMICOLON, "Expected ';' after loop condition.");
 
@@ -355,25 +364,18 @@ Ref<Statement> Parser::for_statement() {
 	}
 	consume(LEFT_BRACE, "Expected '{' after for clauses.");
 
-	Ref<BlockStatement> block = block_statement();
+	Ref<BlockStatement> body = block_statement();
 
-	if (increment) {
-		std::vector<Ref<Statement>> statements = { block, CreateRef<ExpressionStatement>(increment) };
-		block = CreateRef<BlockStatement>(statements);
-	}
+	return CreateRef<ForStatement>(initializer, condition, increment, body);
+}
 
-	if (condition == nullptr) {
-		condition = CreateRef<LiteralExpression>(Literal{true});
-	}
-
-	Ref<Statement> loop_body = CreateRef<WhileStatement>(condition, block);
-
-	if (initializer) {
-		std::vector<Ref<Statement>> statements = { initializer, loop_body };
-		loop_body = CreateRef<BlockStatement>(statements);
-	}
-
-	return loop_body;
+Ref<Statement> Parser::break_statement() {
+	consume(SEMICOLON, "Expected ';' aftrer 'break'.");
+	return CreateRef<BreakStatement>();
+}
+Ref<Statement> Parser::continue_statement() {
+	consume(SEMICOLON, "Expected ';' aftrer 'continue'.");
+	return CreateRef<ContinueStatement>();
 }
 
 

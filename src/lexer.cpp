@@ -8,7 +8,9 @@ namespace minik {
 
 const std::map<std::string, TokenType> Lexer::keywords = {
 	{"and",    AND},
+	{"break",  BREAK},
 	{"class",  CLASS},
+	{"continue", CONTINUE},
 	{"else",   ELSE},
 	{"false",  FALSE},
 	{"for",    FOR},
@@ -21,7 +23,6 @@ const std::map<std::string, TokenType> Lexer::keywords = {
 	{"super",  SUPER},
 	{"this",   THIS},
 	{"true",   TRUE},
-	{"var",    VAR},
 	{"while",  WHILE}
 };
 

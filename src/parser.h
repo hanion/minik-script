@@ -49,6 +49,8 @@ private:
 	Ref<Statement> if_statement();
 	Ref<Statement> while_statement();
 	Ref<Statement> for_statement();
+	Ref<Statement> break_statement();
+	Ref<Statement> continue_statement();
 
 private:
 	std::vector<Token> m_tokens;
