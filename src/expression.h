@@ -70,4 +70,15 @@ struct AssignmentExpression : public Expression {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct LogicalExpression : public Expression {
+	Ref<Expression> left;
+	Token operator_token;
+	Ref<Expression> right;
+
+	LogicalExpression(Ref<Expression> l, Token op, Ref<Expression> r)
+		: left(l), operator_token(op), right(r) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 }

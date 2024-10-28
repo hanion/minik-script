@@ -62,4 +62,14 @@ struct IfStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct WhileStatement : public Statement {
+	Ref<Expression> condition;
+	Ref<BlockStatement> body;
+
+	WhileStatement(const Ref<Expression>& condition, const Ref<BlockStatement>& body)
+		: condition(condition), body(body) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 }

@@ -17,12 +17,14 @@ public:
 	virtual void visit(const GroupingExpression& grouping) override;
 	virtual void visit(const VariableExpression& variable) override;
 	virtual void visit(const AssignmentExpression& assign) override;
+	virtual void visit(const LogicalExpression& logical)   override;
 
 	virtual void visit(const ExpressionStatement& s) override;
 	virtual void visit(const PrintStatement& s)      override;
 	virtual void visit(const VariableStatement& s)   override;
 	virtual void visit(const BlockStatement& s)      override;
 	virtual void visit(const IfStatement& s)         override;
+	virtual void visit(const WhileStatement& s)      override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 

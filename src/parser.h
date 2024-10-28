@@ -35,6 +35,8 @@ private:
 	Ref<Expression> factor();
 	Ref<Expression> unary();
 	Ref<Expression> primary();
+	Ref<Expression> logical_or();
+	Ref<Expression> logical_and();
 
 	void synchronize();
 
@@ -43,8 +45,10 @@ private:
 	Ref<Statement> expression_statement();
 	Ref<Statement> declaration();
 	Ref<Statement> typed_declaration();
-	std::vector<Ref<Statement>> block();
+	Ref<BlockStatement> block_statement();
 	Ref<Statement> if_statement();
+	Ref<Statement> while_statement();
+	Ref<Statement> for_statement();
 
 private:
 	std::vector<Token> m_tokens;

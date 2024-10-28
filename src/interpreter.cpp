@@ -1,4 +1,6 @@
 #include "interpreter.h"
+#include "base.h"
+#include "environment.h"
 #include "exception.h"
 #include "expression.h"
 #include "statement.h"
@@ -30,6 +32,21 @@ void Interpreter::visit(const AssignmentExpression& assign) {
 	Object value = evaluate(assign.value);
 	m_environment->get(assign.name) = value;
 	m_result = value;
+}
+void Interpreter::visit(const LogicalExpression& logical) {
+	Object left = evaluate(logical.left);
+
+	if (logical.operator_token.type == OR) {
+		if (is_truthy(left)) {
+			m_result = left;
+		}
+	} else if (logical.operator_token.type == AND) {
+		if (!is_truthy(left)) {
+			m_result = left;
+		}
+	}
+
+	m_result = evaluate(logical.right);
 }
 
 
@@ -183,6 +200,12 @@ void Interpreter::visit(const IfStatement& s) {
 		execute_block(s.then_branch->statements, CreateRef<Environment>(m_environment));
 	} else if (s.else_branch) {
 		execute_block(s.else_branch->statements, CreateRef<Environment>(m_environment));
+	}
+}
+
+void Interpreter::visit(const WhileStatement& s) {
+	while (is_truthy(evaluate(s.condition))) {
+		execute_block(s.body->statements, CreateRef<Environment>(m_environment));
 	}
 }
 

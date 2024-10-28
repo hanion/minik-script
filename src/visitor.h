@@ -8,12 +8,14 @@ class UnaryExpression;
 class GroupingExpression;
 class VariableExpression;
 class AssignmentExpression;
+class LogicalExpression;
 
 class ExpressionStatement;
 class PrintStatement;
 class VariableStatement;
 class BlockStatement;
 class IfStatement;
+class WhileStatement;
 
 class Visitor {
 public:
@@ -25,6 +27,7 @@ public:
 	virtual void visit(const GroupingExpression& grouping) {}
 	virtual void visit(const VariableExpression& grouping) {}
 	virtual void visit(const AssignmentExpression& assign) {}
+	virtual void visit(const LogicalExpression& logical) {}
 
 
 	virtual void visit(const ExpressionStatement& s) {}
@@ -32,6 +35,7 @@ public:
 	virtual void visit(const VariableStatement& s) {}
 	virtual void visit(const BlockStatement& s) {}
 	virtual void visit(const IfStatement& s) {}
+	virtual void visit(const WhileStatement& s) {}
 
 };
 

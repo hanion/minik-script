@@ -79,7 +79,7 @@ Ref<Expression> Parser::expression() {
 }
 
 Ref<Expression> Parser::assignment() {
-	Ref<Expression> expr = equality();
+	Ref<Expression> expr = logical_or();
 
 	if (match(EQUAL)) {
 		Token equals = previous();
@@ -176,6 +176,30 @@ Ref<Expression> Parser::primary() {
 	return nullptr;
 }
 
+Ref<Expression> Parser::logical_or() {
+	Ref<Expression> expr = logical_and();
+
+	while (match(OR)) {
+		const Token& op = previous();
+		Ref<Expression> right = logical_and();
+		expr = CreateRef<LogicalExpression>(expr, op, right);
+	}
+
+	return expr;
+}
+
+Ref<Expression> Parser::logical_and() {
+	Ref<Expression> expr = equality();
+
+	while (match(AND)) {
+		const Token& op = previous();
+		Ref<Expression> right = equality();
+		expr = CreateRef<LogicalExpression>(expr, op, right);
+	}
+
+	return expr;
+}
+
 void Parser::synchronize() {
 	advance();
 
@@ -206,14 +230,20 @@ void Parser::synchronize() {
 
 
 Ref<Statement> Parser::statement() {
+	if (match(FOR)) {
+		return for_statement();
+	}
 	if (match(IF)) {
 		return if_statement();
 	}
 	if (match(PRINT)) {
 		return print_statement();
 	}
+	if (match(WHILE)) {
+		return while_statement();
+	}
 	if (match(LEFT_BRACE)) {
-		return CreateRef<BlockStatement>(block());
+		return block_statement();
 	}
 
 	return expression_statement();
@@ -264,7 +294,7 @@ Ref<Statement> Parser::typed_declaration() {
 	return CreateRef<VariableStatement>(identifier, initializer);
 }
 
-std::vector<Ref<Statement>> Parser::block() {
+Ref<BlockStatement> Parser::block_statement() {
 	std::vector<Ref<Statement>> statements = {};
 
 	while (!check(RIGHT_BRACE) && !is_at_end()) {
@@ -272,15 +302,15 @@ std::vector<Ref<Statement>> Parser::block() {
 	}
 
 	consume(RIGHT_BRACE, "Expected '}' after block.");
-	return statements;
-}
 
+	return CreateRef<BlockStatement>(statements);
+}
 
 Ref<Statement> Parser::if_statement() {
 	Ref<Expression> condition = expression();
 
 	consume(LEFT_BRACE, "Expected '{' after 'if'.");
-	Ref<BlockStatement> then_branch = CreateRef<BlockStatement>(block());
+	Ref<BlockStatement> then_branch = block_statement();
 	Ref<BlockStatement> else_branch = nullptr;
 
 	if (match(ELSE)) {
@@ -288,11 +318,63 @@ Ref<Statement> Parser::if_statement() {
 			else_branch = CreateRef<BlockStatement>(if_statement());
 		} else {
 			consume(LEFT_BRACE, "Expected '{' after 'else'.");
-			else_branch = CreateRef<BlockStatement>(block());
+			else_branch = block_statement();
 		}
 	}
 
 	return CreateRef<IfStatement>(condition, then_branch, else_branch);
 }
+
+Ref<Statement> Parser::while_statement() {
+	Ref<Expression> condition = expression();
+
+	consume(LEFT_BRACE, "Expected '{' after 'while'.");
+	Ref<BlockStatement> body = block_statement();
+
+	return CreateRef<WhileStatement>(condition, body);
+}
+
+Ref<Statement> Parser::for_statement() {
+	Ref<Statement> initializer = nullptr;
+	if (match(SEMICOLON)) {
+		initializer = nullptr;
+	} else {
+		initializer = declaration();
+	}
+
+	Ref<Expression> condition = nullptr;
+	if (!check(SEMICOLON)) {
+		condition = expression();
+	}
+
+	consume(SEMICOLON, "Expected ';' after loop condition.");
+
+	Ref<Expression> increment = nullptr;
+	if (!check(LEFT_BRACE)) {
+		increment = expression();
+	}
+	consume(LEFT_BRACE, "Expected '{' after for clauses.");
+
+	Ref<BlockStatement> block = block_statement();
+
+	if (increment) {
+		std::vector<Ref<Statement>> statements = { block, CreateRef<ExpressionStatement>(increment) };
+		block = CreateRef<BlockStatement>(statements);
+	}
+
+	if (condition == nullptr) {
+		condition = CreateRef<LiteralExpression>(Literal{true});
+	}
+
+	Ref<Statement> loop_body = CreateRef<WhileStatement>(condition, block);
+
+	if (initializer) {
+		std::vector<Ref<Statement>> statements = { initializer, loop_body };
+		loop_body = CreateRef<BlockStatement>(statements);
+	}
+
+	return loop_body;
+}
+
 
 }
