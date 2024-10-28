@@ -39,10 +39,12 @@ void Interpreter::visit(const LogicalExpression& logical) {
 	if (logical.operator_token.type == OR) {
 		if (is_truthy(left)) {
 			m_result = left;
+			return;
 		}
 	} else if (logical.operator_token.type == AND) {
 		if (!is_truthy(left)) {
 			m_result = left;
+			return;
 		}
 	}
 

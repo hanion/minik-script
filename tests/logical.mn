@@ -1,0 +1,7 @@
+// logical
+
+print false and 2; // false
+print true  and 2; // 2
+print false or 2;  // 2
+print true  or 2;  // true
+print false or true and "this"; // "this"
