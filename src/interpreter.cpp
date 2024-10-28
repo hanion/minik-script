@@ -204,23 +204,34 @@ void Interpreter::visit(const IfStatement& s) {
 }
 
 void Interpreter::visit(const ForStatement& s) {
+	const Ref<Environment>& loop_environment = CreateRef<Environment>(m_environment);
+	const Ref<Environment> previous = m_environment;
 	try {
-		if (s.initializer) {
-			execute(s.initializer);
-		}
-		while (is_truthy(evaluate(s.condition))) {
-			try {
-				execute_block(s.body->statements, CreateRef<Environment>(m_environment));
-			} catch (ContinueException) {
-				// handles continue by ending execution of the block, jumping to the increment
+		m_environment = loop_environment;
+
+		try {
+			if (s.initializer) {
+				execute(s.initializer);
 			}
-			if (s.increment) {
-				evaluate(s.increment);
+			while (is_truthy(evaluate(s.condition))) {
+				try {
+					execute_block(s.body->statements, CreateRef<Environment>(m_environment));
+				} catch (ContinueException) {
+					// handles continue by ending execution of the block, jumping to the increment
+				}
+				if (s.increment) {
+					evaluate(s.increment);
+				}
 			}
+		} catch (BreakException) {
+			// handles break by stopping execution of the loop
 		}
-	} catch (BreakException) {
-		// handles break by stopping execution of the loop
+
+	} catch (...) {
+		m_environment = previous;
+		throw;
 	}
+	m_environment = previous;
 }
 
 void Interpreter::visit(const BreakStatement& s) {
