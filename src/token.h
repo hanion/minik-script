@@ -12,6 +12,8 @@ enum TokenType {
 	COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
 	COLON,
 
+	MOD,
+
 	BANG, BANG_EQUAL,
 	EQUAL, EQUAL_EQUAL,
 	GREATER, GREATER_EQUAL,
@@ -40,6 +42,7 @@ const static std::string token_type_to_string(TokenType type) {
 		case STAR:            return "STAR";
 
 		case COLON:           return "COLON";
+		case MOD:             return "MOD";
 
 		case BANG:            return "BANG";
 		case BANG_EQUAL:      return "BANG_EQUAL";

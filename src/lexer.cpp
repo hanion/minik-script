@@ -53,6 +53,7 @@ void Lexer::scan_token() {
 		case ';': add_token(SEMICOLON); break;
 		case ':': add_token(COLON); break;
 		case '*': add_token(STAR); break; 
+		case '%': add_token(MOD); break; 
 		case '!': add_token(match('=') ? BANG_EQUAL : BANG); break;
 		case '=': add_token(match('=') ? EQUAL_EQUAL : EQUAL); break;
 		case '<': add_token(match('=') ? LESS_EQUAL : LESS); break;

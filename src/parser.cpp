@@ -135,7 +135,7 @@ Ref<Expression> Parser::term() {
 Ref<Expression> Parser::factor() {
 	Ref<Expression> expression = unary();
 
-	while(match(SLASH) || match(STAR)) {
+	while(match(MOD) || match(SLASH) || match(STAR)) {
 		const Token& op = previous();
 		Ref<Expression> right = unary();
 		expression = CreateRef<BinaryExpression>(expression, op, right);

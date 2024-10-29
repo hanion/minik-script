@@ -116,6 +116,9 @@ void Interpreter::visit(const BinaryExpression& binary) {
 		case STAR:
 			m_result.value = l * r;
 			return;
+		case MOD:
+			m_result.value = double(int(l) % int(r));
+			return;
 		case SLASH:
 			m_result.value = l / r;
 			return;
