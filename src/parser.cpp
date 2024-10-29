@@ -145,12 +145,12 @@ Ref<Expression> Parser::factor() {
 }
 
 Ref<Expression> Parser::unary() {
-	if (match(BANG) || match(MINUS)) {
+	if (match(BANG) || match(MINUS) || match(PLUS_PLUS) || match(MINUS_MINUS)) {
 		const Token& op = previous();
 		Ref<Expression> right = unary();
 		return CreateRef<UnaryExpression>(op, right);
 	}
-	return primary();
+	return call();
 }
 
 Ref<Expression> Parser::primary() {
@@ -200,6 +200,34 @@ Ref<Expression> Parser::logical_and() {
 	return expr;
 }
 
+Ref<Expression> Parser::call() {
+	Ref<Expression> expr = primary();
+	while (true) {
+		if (match(LEFT_PAREN)) {
+			expr = finish_call(expr);
+		} else {
+			break;
+		}
+	}
+	return expr;
+}
+
+Ref<Expression> Parser::finish_call(const Ref<Expression>& callee) {
+	std::vector<Ref<Expression>> arguments = {};
+	if (!check(RIGHT_PAREN)) {
+		do {
+			if (arguments.size() >= 255) {
+				report_error(peek().line, "Can't have more than 255 arguments.");
+			}
+			arguments.emplace_back(expression());
+		} while (match(COMMA));
+	}
+
+	Token paren = consume(RIGHT_PAREN, "Expected ')' after arguments.");
+
+	return CreateRef<CallExpression>(callee, paren, arguments);
+}
+
 void Parser::synchronize() {
 	advance();
 
@@ -211,7 +239,6 @@ void Parser::synchronize() {
 		switch (peek().type) {
 			case CLASS:
 			case FUN:
-			case VAR:
 			case FOR:
 			case IF:
 			case WHILE:
@@ -289,6 +316,15 @@ Ref<Statement> Parser::typed_declaration() {
 
 	if (match(COLON)) {
 		// TODO: type
+
+		// second colon
+		if (check(COLON)) {
+			// either constant, function, struct, class, enum
+			if (check_next(LEFT_PAREN)) {
+				match(COLON);
+				return function(identifier);
+			}
+		}
 	}
 
 	Ref<Expression> initializer = nullptr;
@@ -376,6 +412,24 @@ Ref<Statement> Parser::break_statement() {
 Ref<Statement> Parser::continue_statement() {
 	consume(SEMICOLON, "Expected ';' aftrer 'continue'.");
 	return CreateRef<ContinueStatement>();
+}
+
+Ref<Statement> Parser::function(const Token& identifier) {
+	consume(LEFT_PAREN, "Expected '(' at function declaration.");
+	std::vector<Token> parameters = {};
+	if (!check(RIGHT_PAREN)) {
+		do {
+			if (parameters.size() >= 255) {
+				report_error(peek().line, "Can't have more than 255 arguments.");
+			}
+
+			parameters.emplace_back(consume(IDENTIFIER, "Expected parameter name."));
+		} while (match(COMMA));
+	}
+	consume(RIGHT_PAREN, "Expected ')' after paramaters.");
+	consume(LEFT_BRACE, "Expected '{' after function declaration.");
+	Ref<BlockStatement> body = block_statement();
+	return CreateRef<FunctionStatement>(identifier, parameters, body);
 }
 
 

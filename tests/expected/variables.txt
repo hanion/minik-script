@@ -9,5 +9,11 @@ newstr
 30.000000
 4.000000
 1.000000
+true
+true
+true
+true
+true
+true
 should give redefinition error ->
-[ERROR] ! Error [line 30], Redefinition of 'a'.
+[ERROR] [line 44], Redefinition of 'a'.

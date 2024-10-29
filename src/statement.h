@@ -86,4 +86,16 @@ struct ContinueStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct FunctionStatement : public Statement {
+	Token name;
+	std::vector<Token> params;
+	Ref<BlockStatement> body;
+
+	FunctionStatement(const Token& name, const std::vector<Token>& params, const Ref<BlockStatement>& body)
+		: name(name), params(params), body(body) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+
 }

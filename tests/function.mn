@@ -1,0 +1,27 @@
+// function
+
+primes_till :: (x) {
+	for num := 2; num <= x; ++num {
+		is_prime := true;
+
+		for divisor := 2; divisor * divisor <= num; ++divisor {
+			if num % divisor == 0 {
+				is_prime = false;
+				break;
+			}
+		}
+
+		if is_prime {
+			print num;
+		}
+	}
+}
+
+start_time := clock();
+primes_till(100);
+end_time := clock();
+duration := end_time - start_time;
+print (duration > 0) and (duration < 100); // true
+
+print "should give undefined variable error ->";
+print x;

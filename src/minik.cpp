@@ -70,7 +70,7 @@ void run_prompt() {
 
 void report_error(int line, const std::string& message) {
 	had_error = true;
-	MN_ERROR("! Error [line %d], %s", line, message.c_str());
+	MN_ERROR("[line %d], %s", line, message.c_str());
 }
 
 void report_parse_error(const ParseException& e) {

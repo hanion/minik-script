@@ -31,10 +31,11 @@ inline void mn_print_colored(const char* color, const char* prefix, const char* 
 #if MN_DEBUG
 	#define MN_LOG(fmt, ...) mn_print_colored(COLOR_RESET, "[LOG] ", fmt, ##__VA_ARGS__)
 	#define MN_ERROR(fmt, ...) mn_print_colored(COLOR_RED, "[ERROR] ", fmt, ##__VA_ARGS__)
-	#define MN_PRINT(fmt, ...) mn_print_colored(COLOR_RESET, "", fmt, ##__VA_ARGS__)
 #else
 	#define MN_LOG(fmt, ...)
 	#define MN_ERROR(fmt, ...)
-	#define MN_PRINT(fmt, ...) mn_print_colored(COLOR_RESET, "", fmt, ##__VA_ARGS__)
 #endif
+
+#define MN_PRINT(fmt, ...) mn_print_colored(COLOR_RESET, "", fmt, ##__VA_ARGS__)
+#define MN_PRINT_ERROR(fmt, ...) mn_print_colored(COLOR_RED, "", fmt, ##__VA_ARGS__)
 

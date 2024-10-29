@@ -48,8 +48,20 @@ void Lexer::scan_token() {
 		case '}': add_token(RIGHT_BRACE); break;
 		case ',': add_token(COMMA); break;
 		case '.': add_token(DOT); break;
-		case '-': add_token(MINUS); break;
-		case '+': add_token(PLUS); break;
+		case '-':
+			if (match('-')) {
+				add_token(MINUS_MINUS);
+			} else {
+				add_token(MINUS);
+			}
+			break;
+		case '+':
+			if (match('+')) {
+				add_token(PLUS_PLUS);
+			} else {
+				add_token(PLUS);
+			}
+			break;
 		case ';': add_token(SEMICOLON); break;
 		case ':': add_token(COLON); break;
 		case '*': add_token(STAR); break; 

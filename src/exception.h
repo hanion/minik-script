@@ -45,6 +45,7 @@ void report_runtime_error(const InterpreterException& e);
 
 struct BreakException {};
 struct ContinueException {};
+struct AssertException {};
 
 
 }

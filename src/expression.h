@@ -2,6 +2,7 @@
 
 #include "token.h"
 #include "visitor.h"
+#include <vector>
 
 
 namespace minik {
@@ -77,6 +78,17 @@ struct LogicalExpression : public Expression {
 
 	LogicalExpression(Ref<Expression> l, Token op, Ref<Expression> r)
 		: left(l), operator_token(op), right(r) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct CallExpression : public Expression {
+	Ref<Expression> callee;
+	Token paren;
+	std::vector<Ref<Expression>> arguments;
+
+	CallExpression(Ref<Expression> callee, Token paren, std::vector<Ref<Expression>> arguments)
+		: callee(callee), paren(paren), arguments(arguments) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };

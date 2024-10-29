@@ -1,5 +1,7 @@
 #pragma once
 
+#include "callable.h"
+#include "function.h"
 #include "environment.h"
 #include "expression.h"
 #include "minik.h"
@@ -11,13 +13,16 @@ namespace minik {
 
 class Interpreter : public Visitor {
 public:
-	virtual void visit(const LiteralExpression& literal)   override;
-	virtual void visit(const BinaryExpression& binary)     override;
-	virtual void visit(const UnaryExpression& unary)       override;
-	virtual void visit(const GroupingExpression& grouping) override;
-	virtual void visit(const VariableExpression& variable) override;
-	virtual void visit(const AssignmentExpression& assign) override;
-	virtual void visit(const LogicalExpression& logical)   override;
+	Interpreter();
+
+	virtual void visit(const LiteralExpression& e)    override;
+	virtual void visit(const BinaryExpression& e)     override;
+	virtual void visit(const UnaryExpression& e)      override;
+	virtual void visit(const GroupingExpression& e)   override;
+	virtual void visit(const VariableExpression& e)   override;
+	virtual void visit(const AssignmentExpression& e) override;
+	virtual void visit(const LogicalExpression& e)    override;
+	virtual void visit(const CallExpression& e)       override;
 
 	virtual void visit(const ExpressionStatement& s) override;
 	virtual void visit(const PrintStatement& s)      override;
@@ -27,15 +32,11 @@ public:
 	virtual void visit(const ForStatement& s)        override;
 	virtual void visit(const BreakStatement& s)      override;
 	virtual void visit(const ContinueStatement& s)   override;
+	virtual void visit(const FunctionStatement& s)   override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 
 private:
-	Object visit(const Ref<Expression>& expression) {
-		expression->accept(*this);
-		return m_result;
-	}
-
 	Object evaluate(const Ref<Expression>& expression);
 	bool is_equal(const Token& token, const Object& a, const Object& b) const;
 	bool is_truthy(const Token& token, const Object& object) const;
@@ -45,8 +46,10 @@ private:
 
 
 private:
-	Ref<Environment> m_environment = CreateRef<Environment>();
+	Ref<Environment> m_globals = CreateRef<Environment>();
+	Ref<Environment> m_environment = m_globals;
 	Object m_result;
+friend MinikFunction;
 };
 
 }

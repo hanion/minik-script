@@ -37,6 +37,8 @@ private:
 	Ref<Expression> primary();
 	Ref<Expression> logical_or();
 	Ref<Expression> logical_and();
+	Ref<Expression> call();
+	Ref<Expression> finish_call(const Ref<Expression>& callee);
 
 	void synchronize();
 
@@ -51,6 +53,7 @@ private:
 	Ref<Statement> for_statement();
 	Ref<Statement> break_statement();
 	Ref<Statement> continue_statement();
+	Ref<Statement> function(const Token& identifier);
 
 private:
 	std::vector<Token> m_tokens;

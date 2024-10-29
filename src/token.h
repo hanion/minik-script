@@ -12,7 +12,7 @@ enum TokenType {
 	COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
 	COLON,
 
-	MOD,
+	PLUS_PLUS, MINUS_MINUS, MOD,
 
 	BANG, BANG_EQUAL,
 	EQUAL, EQUAL_EQUAL,
@@ -22,7 +22,7 @@ enum TokenType {
 	IDENTIFIER, STRING, NUMBER,
 
 	AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-	PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+	PRINT, RETURN, SUPER, THIS, TRUE, WHILE,
 	BREAK, CONTINUE,
 	MEOF
 };
@@ -42,6 +42,8 @@ const static std::string token_type_to_string(TokenType type) {
 		case STAR:            return "STAR";
 
 		case COLON:           return "COLON";
+		case PLUS_PLUS:       return "PLUS_PLUS";
+		case MINUS_MINUS:     return "MINUS_MINUS";
 		case MOD:             return "MOD";
 
 		case BANG:            return "BANG";
@@ -71,7 +73,6 @@ const static std::string token_type_to_string(TokenType type) {
 		case SUPER:           return "SUPER";
 		case THIS:            return "THIS";
 		case TRUE:            return "TRUE";
-		case VAR:             return "VAR";
 		case WHILE:           return "WHILE";
 		case BREAK:           return "BREAK";
 		case CONTINUE:        return "CONTINUE";

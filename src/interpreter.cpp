@@ -3,93 +3,170 @@
 #include "environment.h"
 #include "exception.h"
 #include "expression.h"
+#include "minik.h"
 #include "statement.h"
+#include "token.h"
+#include "callable.h"
+#include <cassert>
+#include <string>
+#include <chrono>
 
 namespace minik {
+
+Interpreter::Interpreter() {
+	Token name = Token(IDENTIFIER, "clock", {}, 0);
+	m_globals->define(name, { CreateRef<mcClock>() });
+
+	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), { CreateRef<mcAssert>() });
+}
+
 
 void Interpreter::interpret(const std::vector<Ref<Statement>>& statements) {
 	try {
 		for (const Ref<Statement>& statement : statements) {
 			execute(statement);
 		}
+	} catch (BreakException) {
+	} catch (ContinueException) {
 	} catch (InterpreterException e) {
 		report_runtime_error(e);
 	}
 }
 
 
-void Interpreter::visit(const LiteralExpression& literal) {
-	m_result = literal.value;
+void Interpreter::visit(const LiteralExpression& e) {
+	m_result = e.value;
 }
 
-void Interpreter::visit(const GroupingExpression& grouping) {
-	evaluate(grouping.expression);
+void Interpreter::visit(const GroupingExpression& e) {
+	evaluate(e.expression);
 }
-void Interpreter::visit(const VariableExpression& variable) {
-	m_result = m_environment->get(variable.name);
+void Interpreter::visit(const VariableExpression& e) {
+	m_result = m_environment->get(e.name);
 }
-void Interpreter::visit(const AssignmentExpression& assign) {
-	Object value = evaluate(assign.value);
-	m_environment->get(assign.name) = value;
+void Interpreter::visit(const AssignmentExpression& e) {
+	Object value = evaluate(e.value);
+	m_environment->get(e.name) = value;
 	m_result = value;
 }
-void Interpreter::visit(const LogicalExpression& logical) {
-	Object left = evaluate(logical.left);
+void Interpreter::visit(const LogicalExpression& e) {
+	Object left = evaluate(e.left);
 
-	if (logical.operator_token.type == OR) {
+	if (e.operator_token.type == OR) {
 		if (is_truthy(left)) {
 			m_result = left;
 			return;
 		}
-	} else if (logical.operator_token.type == AND) {
+	} else if (e.operator_token.type == AND) {
 		if (!is_truthy(left)) {
 			m_result = left;
 			return;
 		}
 	}
 
-	m_result = evaluate(logical.right);
+	m_result = evaluate(e.right);
 }
 
+void Interpreter::visit(const CallExpression& e) {
+	Object callee = evaluate(e.callee);
 
-void Interpreter::visit(const UnaryExpression& unary) {
-	Object right = evaluate(unary.right);
+	std::vector<Object> arguments;
+	arguments.reserve(e.arguments.size());
+	for (const Ref<Expression>& argument : e.arguments) {
+		arguments.emplace_back(evaluate(argument));
+	}
 
-	switch (unary.operator_token.type) {
+	if (!callee.is_callable()) {
+		m_result = {};
+		throw InterpreterException(e.paren, "Object is not callable.");
+	}
+
+	const Ref<MinikCallable>& function = callee.as_callable();
+
+	if (function->arity() != -1 && arguments.size() != function->arity()) {
+		throw InterpreterException(e.paren, "Expected " +
+						 std::to_string(function->arity()) + " arguments but got " +
+						 std::to_string(arguments.size()) + ".");
+	}
+
+	try {
+		m_result = function->call(*this, arguments);
+	} catch (AssertException) {
+		throw InterpreterException(e.paren, "Assertion failed.");
+	}
+}
+
+void Interpreter::visit(const FunctionStatement& s) {
+	Ref<MinikFunction> function = CreateRef<MinikFunction>(s);
+	m_environment->define(s.name, Object{function});
+}
+
+void Interpreter::visit(const UnaryExpression& e) {
+	Object right = evaluate(e.right);
+
+	switch (e.operator_token.type) {
 		case BANG:
-			m_result.value = !is_truthy(unary.operator_token, right);
+			m_result.value = !is_truthy(e.operator_token, right);
 			return;
 		case MINUS:
 			if (right.is_double()) {
 				m_result.value = -right.as_double();
 				return;
 			}
-			throw InterpreterException(unary.operator_token, right, "Invalid argument type to unary expression.");
+			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
+		case PLUS_PLUS: {
+			if (right.is_double()) {
+				auto var = dynamic_cast<const VariableExpression*>(e.right.get());
+				if (var) {
+					const Token& varName = var->name;
+					Object& value = m_environment->get(varName);
+					value = Object{right.as_double()+1};
+					m_result = value;
+					return;
+				}
+				return;
+			}
+			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
+		}
+		case MINUS_MINUS: {
+			if (right.is_double()) {
+				auto var = dynamic_cast<const VariableExpression*>(e.right.get());
+				if (var) {
+					const Token& varName = var->name;
+					Object& value = m_environment->get(varName);
+					value = Object{right.as_double()-1};
+					m_result = value;
+					return;
+				}
+				return;
+			}
+			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
+		}
 		default:
 			MN_ERROR("Unreachable. Interpreter visit unary");
 			return;
 	}
 }
 
-void Interpreter::visit(const BinaryExpression& binary) {
-	Object left = evaluate(binary.left);
-	Object right = evaluate(binary.right);
+void Interpreter::visit(const BinaryExpression& e) {
+	Object left = evaluate(e.left);
+	Object right = evaluate(e.right);
 
 
 	// string concatenation
-	if (binary.operator_token.type == PLUS && left.is_string() && right.is_string()) {
+	if (e.operator_token.type == PLUS && left.is_string() && right.is_string()) {
 		m_result.value = left.as_string() + right.as_string();
 		return;
 	}
 
 
 	// is equals
-	switch (binary.operator_token.type) {
+	switch (e.operator_token.type) {
 		case EQUAL_EQUAL:
-			m_result.value = is_equal(binary.operator_token, left, right);
+			m_result.value = is_equal(e.operator_token, left, right);
 			return;
 		case BANG_EQUAL:
-			m_result.value = !is_equal(binary.operator_token, left, right);
+			m_result.value = !is_equal(e.operator_token, left, right);
 			return;
 		default:
 			break;
@@ -98,15 +175,15 @@ void Interpreter::visit(const BinaryExpression& binary) {
 
 	// doubles
 	if (!left.is_double()) {
-		throw InterpreterException(binary.operator_token, left, "Invalid operand to binary expression.");
+		throw InterpreterException(e.operator_token, left, "Invalid operand to binary expression.");
 	}
 	if (!right.is_double()) {
-		throw InterpreterException(binary.operator_token, right, "Invalid operand to binary expression.");
+		throw InterpreterException(e.operator_token, right, "Invalid operand to binary expression.");
 	}
 	double l = left.as_double();
 	double r = right.as_double();
 
-	switch (binary.operator_token.type) {
+	switch (e.operator_token.type) {
 		case PLUS:
 			m_result.value = l + r;
 			return;
