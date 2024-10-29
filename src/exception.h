@@ -47,5 +47,8 @@ struct BreakException {};
 struct ContinueException {};
 struct AssertException {};
 
+struct ReturnException {
+	Object value;
+};
 
 }

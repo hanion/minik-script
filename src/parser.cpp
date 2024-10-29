@@ -257,6 +257,9 @@ void Parser::synchronize() {
 
 
 Ref<Statement> Parser::statement() {
+	if (match(RETURN)) {
+		return return_statement();
+	}
 	if (match(BREAK)) {
 		return break_statement();
 	}
@@ -432,5 +435,15 @@ Ref<Statement> Parser::function(const Token& identifier) {
 	return CreateRef<FunctionStatement>(identifier, parameters, body);
 }
 
+
+Ref<Statement> Parser::return_statement() {
+	Token keyword = previous();
+	Ref<Expression> value = nullptr;
+	if (!check(SEMICOLON)) {
+		value = expression();
+	}
+	consume(SEMICOLON, "Expected ';' after return value.");
+	return CreateRef<ReturnStatement>(keyword, value);
+}
 
 }

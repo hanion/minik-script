@@ -20,6 +20,7 @@ class ForStatement;
 class BreakStatement;
 class ContinueStatement;
 class FunctionStatement;
+class ReturnStatement;
 
 class Visitor {
 public:
@@ -44,6 +45,7 @@ public:
 	virtual void visit(const BreakStatement& s) {}
 	virtual void visit(const ContinueStatement& s) {}
 	virtual void visit(const FunctionStatement& s) {}
+	virtual void visit(const ReturnStatement& s) {}
 
 };
 

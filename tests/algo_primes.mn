@@ -1,0 +1,21 @@
+// primes
+
+is_prime :: (num) {
+	for divisor := 2; divisor * divisor <= num; ++divisor {
+		if num % divisor == 0 {
+			return false;
+		}
+	}
+	return true;
+}
+
+primes_till :: (x) {
+	for num := 2; num <= x; ++num {
+		if is_prime(num) {
+			print num;
+		}
+	}
+}
+
+primes_till(100);
+

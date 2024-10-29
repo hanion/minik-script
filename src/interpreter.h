@@ -33,6 +33,7 @@ public:
 	virtual void visit(const BreakStatement& s)      override;
 	virtual void visit(const ContinueStatement& s)   override;
 	virtual void visit(const FunctionStatement& s)   override;
+	virtual void visit(const ReturnStatement& s)     override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 

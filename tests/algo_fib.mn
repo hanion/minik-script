@@ -1,0 +1,16 @@
+// fib
+
+fib :: (n) {
+	if n <= 1 {
+		return n;
+	}
+	return fib(n-2) + fib(n-1);
+}
+
+first_fibs :: (x) {
+	for i := 0; i < x; ++i {
+		print fib(i);
+	}
+}
+
+first_fibs(10);

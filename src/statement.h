@@ -97,5 +97,15 @@ struct FunctionStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct ReturnStatement : public Statement {
+	Token keyword;
+	Ref<Expression> value;
+
+	ReturnStatement(const Token& keyword, const Ref<Expression>& value)
+		: keyword(keyword), value(value) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 
 }

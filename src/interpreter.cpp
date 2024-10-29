@@ -97,8 +97,16 @@ void Interpreter::visit(const CallExpression& e) {
 }
 
 void Interpreter::visit(const FunctionStatement& s) {
-	Ref<MinikFunction> function = CreateRef<MinikFunction>(s);
+	Ref<MinikFunction> function = CreateRef<MinikFunction>(s, m_environment);
 	m_environment->define(s.name, Object{function});
+}
+
+void Interpreter::visit(const ReturnStatement& s) {
+	Object value;
+	if (s.value) {
+		value = evaluate(s.value);
+	}
+	throw ReturnException{value};
 }
 
 void Interpreter::visit(const UnaryExpression& e) {

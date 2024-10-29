@@ -54,6 +54,7 @@ private:
 	Ref<Statement> break_statement();
 	Ref<Statement> continue_statement();
 	Ref<Statement> function(const Token& identifier);
+	Ref<Statement> return_statement();
 
 private:
 	std::vector<Token> m_tokens;
