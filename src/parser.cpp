@@ -409,12 +409,12 @@ Ref<Statement> Parser::for_statement() {
 }
 
 Ref<Statement> Parser::break_statement() {
-	consume(SEMICOLON, "Expected ';' aftrer 'break'.");
-	return CreateRef<BreakStatement>();
+	const Token& token = consume(SEMICOLON, "Expected ';' aftrer 'break'.");
+	return CreateRef<BreakStatement>(token);
 }
 Ref<Statement> Parser::continue_statement() {
-	consume(SEMICOLON, "Expected ';' aftrer 'continue'.");
-	return CreateRef<ContinueStatement>();
+	const Token& token = consume(SEMICOLON, "Expected ';' aftrer 'continue'.");
+	return CreateRef<ContinueStatement>(token);
 }
 
 Ref<Statement> Parser::function(const Token& identifier) {

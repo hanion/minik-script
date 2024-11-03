@@ -1,5 +1,6 @@
 #pragma once
 
+#include "token.h"
 #include "visitor.h"
 #include "expression.h"
 #include <vector>
@@ -80,9 +81,19 @@ struct ForStatement : public Statement {
 };
 
 struct BreakStatement : public Statement {
+	Token keyword;
+
+	BreakStatement(const Token& keyword)
+		: keyword(keyword) {}
+
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 struct ContinueStatement : public Statement {
+	Token keyword;
+
+	ContinueStatement(const Token& keyword)
+		: keyword(keyword) {}
+
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 

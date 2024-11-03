@@ -14,20 +14,20 @@ public:
 	virtual ~MinikCallable() = default;
 	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments);
 	virtual int arity() { return 0; }
-	virtual std::string to_string() { return "<fn>"; }
+	virtual std::string to_string() const { return "<fn>"; }
 };
 
 class mcClock : public MinikCallable {
 public:
 	virtual int arity() override { return 0; }
-	virtual std::string to_string() override { return "<fn native clock>"; }
+	virtual std::string to_string() const override { return "<fn native clock>"; }
 	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
 };
 
 class mcAssert : public MinikCallable {
 public:
 	virtual int arity() override { return -1; }
-	virtual std::string to_string() override { return "<fn native assert>"; }
+	virtual std::string to_string() const override { return "<fn native assert>"; }
 	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
 };
 

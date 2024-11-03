@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "ast_printer.cpp"
+#include "resolver.h"
 #include "statement.h"
 
 #include <cstdlib>
@@ -22,6 +23,13 @@ void run(const std::string& source) {
 	std::vector<Token>& tokens = lexer.scan_tokens();
 	Parser parser = Parser(tokens);
 	std::vector<Ref<Statement>> statements = parser.parse();
+
+	if (had_error) {
+		return;
+	}
+
+	Resolver resolver = Resolver(interpreter);
+	resolver.resolve_block(statements);
 
 	if (had_error) {
 		return;

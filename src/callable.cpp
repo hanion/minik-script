@@ -33,7 +33,6 @@ Object mcAssert::call(Interpreter& interpreter, const std::vector<Object>& argum
 
 	if (arguments.size() == 1) {
 		if (!condition) {
-			MN_PRINT_ERROR("Assertion failed.");
 			throw AssertException();
 		}
 	} else if (arguments.size() == 2) {

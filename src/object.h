@@ -38,6 +38,8 @@ struct Object {
 			return std::to_string(as_double());
 		} else if (is_string()) {
 			return as_string();
+		} else if (is_callable()) {
+			return as_callable()->to_string();
 		}
 		return "";
 	}

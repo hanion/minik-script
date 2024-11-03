@@ -3,6 +3,7 @@
 #include "environment.h"
 #include "exception.h"
 #include "expression.h"
+#include "log.h"
 #include "minik.h"
 #include "statement.h"
 #include "token.h"
@@ -14,10 +15,8 @@
 namespace minik {
 
 Interpreter::Interpreter() {
-	Token name = Token(IDENTIFIER, "clock", {}, 0);
-	m_globals->define(name, { CreateRef<mcClock>() });
-
-	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), { CreateRef<mcAssert>() });
+	m_globals->define(Token(IDENTIFIER, "clock", {}, 0), Object{ CreateRef<mcClock>() });
+	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), Object{ CreateRef<mcAssert>() });
 }
 
 
@@ -33,6 +32,20 @@ void Interpreter::interpret(const std::vector<Ref<Statement>>& statements) {
 	}
 }
 
+void Interpreter::resolve(const Expression& expression, int depth) {
+	m_locals[&expression] = depth;
+}
+
+Object Interpreter::look_up_variable(const Token& name, const Expression& expression) {
+	auto it = m_locals.find(&expression);
+	if (it != m_locals.end()) {
+		int distance = it->second;
+		return m_environment->get_at(distance, name);
+	} else {
+		return m_globals->get(name);
+	}
+}
+
 
 void Interpreter::visit(const LiteralExpression& e) {
 	m_result = e.value;
@@ -42,11 +55,19 @@ void Interpreter::visit(const GroupingExpression& e) {
 	evaluate(e.expression);
 }
 void Interpreter::visit(const VariableExpression& e) {
-	m_result = m_environment->get(e.name);
+	m_result = look_up_variable(e.name, e);
 }
 void Interpreter::visit(const AssignmentExpression& e) {
 	Object value = evaluate(e.value);
-	m_environment->get(e.name) = value;
+
+	auto it = m_locals.find(&e);
+	if (it != m_locals.end()) {
+		int distance = it->second;
+		m_environment->get_at(distance, e.name) = value;
+	} else {
+		m_globals->get(e.name) = value;
+	}
+
 	m_result = value;
 }
 void Interpreter::visit(const LogicalExpression& e) {

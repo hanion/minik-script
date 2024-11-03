@@ -1,22 +1,29 @@
 #pragma once
-
-#include "callable.h"
-#include "function.h"
-#include "environment.h"
-#include "expression.h"
-#include "minik.h"
-#include "object.h"
-#include "statement.h"
+#include "interpreter.h"
+#include "visitor.h"
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 namespace minik {
 
-class Interpreter : public Visitor {
-public:
-	Interpreter();
+using ResolverScope = std::unordered_map<std::string, bool>;
 
-	virtual void visit(const LiteralExpression& e)    override;
+enum class FunctionType {
+	NONE,
+	FUNCTION
+};
+
+enum class LoopType {
+	NONE,
+	FOR
+};
+
+class Resolver : public Visitor {
+public:
+	Resolver(Interpreter& interpreter)
+		: m_interpreter(interpreter) {}
+
 	virtual void visit(const BinaryExpression& e)     override;
 	virtual void visit(const UnaryExpression& e)      override;
 	virtual void visit(const GroupingExpression& e)   override;
@@ -36,28 +43,28 @@ public:
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
 
-	void interpret(const std::vector<Ref<Statement>>& statements);
+	void resolve_block(const std::vector<Ref<Statement>>& statements);
+private:
+	void resolve(const Ref<Statement>& statement);
+	void resolve(const Ref<Expression>& expression);
+	void resolve_local(const Expression& expression, const Token& token);
+	void resolve_function(const FunctionStatement& s, FunctionType type);
 
-	void resolve(const Expression& expression, int depth);
+
+	void begin_scope();
+	void end_scope();
+
+	void declare(const Token& name);
+	void define(const Token& name);
+
+
 
 private:
-	Object look_up_variable(const Token& name, const Expression& expression);
+	Interpreter& m_interpreter;
+	std::vector<ResolverScope> m_scopes = {};
+	FunctionType m_current_function = FunctionType::NONE;
+	LoopType m_current_loop = LoopType::NONE;
 
-	Object evaluate(const Ref<Expression>& expression);
-	bool is_equal(const Token& token, const Object& a, const Object& b) const;
-	bool is_truthy(const Token& token, const Object& object) const;
-	bool is_truthy(const Object& object) const;
-	void execute(const Ref<Statement>& statement);
-	void execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment);
-
-
-private:
-	Ref<Environment> m_globals = CreateRef<Environment>();
-	Ref<Environment> m_environment = m_globals;
-	std::unordered_map<const Expression*, int> m_locals = {};
-	Object m_result;
-friend MinikFunction;
 };
 
 }
-
