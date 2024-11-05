@@ -118,5 +118,15 @@ struct ReturnStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct ClassStatement : public Statement {
+	Token name;
+	std::vector<Ref<FunctionStatement>> methods;
+
+	ClassStatement(const Token& name, const std::vector<Ref<FunctionStatement>>& methods)
+		: name(name), methods(methods) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 
 }

@@ -1,8 +1,10 @@
 #include "interpreter.h"
 #include "base.h"
+#include "class.h"
 #include "environment.h"
 #include "exception.h"
 #include "expression.h"
+#include "function.h"
 #include "log.h"
 #include "minik.h"
 #include "statement.h"
@@ -41,9 +43,8 @@ Object Interpreter::look_up_variable(const Token& name, const Expression& expres
 	if (it != m_locals.end()) {
 		int distance = it->second;
 		return m_environment->get_at(distance, name);
-	} else {
-		return m_globals->get(name);
 	}
+	return m_globals->get(name);
 }
 
 
@@ -117,6 +118,30 @@ void Interpreter::visit(const CallExpression& e) {
 	}
 }
 
+void Interpreter::visit(const GetExpression& e) {
+	Object object = evaluate(e.object);
+	if (object.is_instance()) {
+		m_result = object.as_instance()->get(e.name, object.as_instance());
+		return;
+	}
+
+	throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
+}
+void Interpreter::visit(const SetExpression& e) {
+	Object object = evaluate(e.object);
+	if (!object.is_instance()) {
+		throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
+	}
+
+	Object value = evaluate(e.value);
+	object.as_instance()->set(e.name, CreateRef<Object>(value));
+	m_result = value;
+}
+
+void Interpreter::visit(const ThisExpression& e) {
+	m_result = look_up_variable(e.keyword, e);
+}
+
 void Interpreter::visit(const FunctionStatement& s) {
 	Ref<MinikFunction> function = CreateRef<MinikFunction>(s, m_environment);
 	m_environment->define(s.name, Object{function});
@@ -128,6 +153,18 @@ void Interpreter::visit(const ReturnStatement& s) {
 		value = evaluate(s.value);
 	}
 	throw ReturnException{value};
+}
+
+void Interpreter::visit(const ClassStatement& s) {
+ 	m_environment->define(s.name, {});
+
+	MethodsMap methods(s.methods.size());
+	for (const Ref<FunctionStatement>& method : s.methods) {
+		bool is_initializer = (method->name.lexeme == s.name.lexeme);
+		methods[method->name.lexeme] = CreateRef<MinikFunction>(*method.get(), m_environment, is_initializer);
+	}
+
+ 	m_environment->get(s.name).value = CreateRef<MinikClass>(s.name.lexeme, methods);
 }
 
 void Interpreter::visit(const UnaryExpression& e) {

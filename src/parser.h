@@ -53,8 +53,9 @@ private:
 	Ref<Statement> for_statement();
 	Ref<Statement> break_statement();
 	Ref<Statement> continue_statement();
-	Ref<Statement> function(const Token& identifier);
+	Ref<FunctionStatement> function(const Token& identifier);
 	Ref<Statement> return_statement();
+	Ref<Statement> class_declaration(const Token& identifier);
 
 private:
 	std::vector<Token> m_tokens;

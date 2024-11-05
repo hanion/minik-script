@@ -1,9 +1,14 @@
 #include "function.h"
+#include "base.h"
+#include "class.h"
 #include "environment.h"
 #include "exception.h"
 #include "interpreter.h"
+#include "token.h"
 
 namespace minik {
+
+static const Token THIS_TOKEN = {IDENTIFIER, "this", {}, 0};
 
 Object MinikFunction::call(Interpreter& interpreter, const std::vector<Object>& arguments) {
 	Ref<Environment> env = CreateRef<Environment>(m_closure);
@@ -14,9 +19,15 @@ Object MinikFunction::call(Interpreter& interpreter, const std::vector<Object>& 
 	try {
 		interpreter.execute_block(m_declaration.body->statements, env);
 	} catch (ReturnException e) {
+		if (m_is_initializer) {
+			return m_closure->get_at(0,THIS_TOKEN);
+		}
 		return e.value;
 	}
-	// TODO: return values
+
+	if (m_is_initializer) {
+		return m_closure->get_at(0,THIS_TOKEN);
+	}
 	return {};
 }
 
@@ -26,6 +37,12 @@ int MinikFunction::arity() {
 
 std::string MinikFunction::to_string() const {
 	return "<fn " + m_declaration.name.lexeme + ">";
+}
+
+Ref<MinikFunction> MinikFunction::bind(const Ref<MinikInstance>& instance) {
+	Ref<Environment> env = CreateRef<Environment>(m_closure);
+	env->define(THIS_TOKEN, Object{instance});
+	return CreateRef<MinikFunction>(m_declaration, env, m_is_initializer);
 }
 
 }

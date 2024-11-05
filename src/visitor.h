@@ -10,6 +10,9 @@ class VariableExpression;
 class AssignmentExpression;
 class LogicalExpression;
 class CallExpression;
+class GetExpression;
+class SetExpression;
+class ThisExpression;
 
 class ExpressionStatement;
 class PrintStatement;
@@ -21,6 +24,7 @@ class BreakStatement;
 class ContinueStatement;
 class FunctionStatement;
 class ReturnStatement;
+class ClassStatement;
 
 class Visitor {
 public:
@@ -34,6 +38,9 @@ public:
 	virtual void visit(const AssignmentExpression& e) {}
 	virtual void visit(const LogicalExpression& e) {}
 	virtual void visit(const CallExpression& e) {}
+	virtual void visit(const GetExpression& e) {}
+	virtual void visit(const SetExpression& e) {}
+	virtual void visit(const ThisExpression& e) {}
 
 
 	virtual void visit(const ExpressionStatement& s) {}
@@ -46,6 +53,7 @@ public:
 	virtual void visit(const ContinueStatement& s) {}
 	virtual void visit(const FunctionStatement& s) {}
 	virtual void visit(const ReturnStatement& s) {}
+	virtual void visit(const ClassStatement& s) {}
 
 };
 

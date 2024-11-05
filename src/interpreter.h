@@ -24,6 +24,9 @@ public:
 	virtual void visit(const AssignmentExpression& e) override;
 	virtual void visit(const LogicalExpression& e)    override;
 	virtual void visit(const CallExpression& e)       override;
+	virtual void visit(const GetExpression& e)        override;
+	virtual void visit(const SetExpression& e)        override;
+	virtual void visit(const ThisExpression& e)       override;
 
 	virtual void visit(const ExpressionStatement& s) override;
 	virtual void visit(const PrintStatement& s)      override;
@@ -35,6 +38,7 @@ public:
 	virtual void visit(const ContinueStatement& s)   override;
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
+	virtual void visit(const ClassStatement& s)      override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 

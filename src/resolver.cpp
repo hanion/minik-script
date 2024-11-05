@@ -1,5 +1,6 @@
 #include "resolver.h"
 #include "expression.h"
+#include "log.h"
 #include "minik.h"
 #include "statement.h"
 #include "token.h"
@@ -62,13 +63,13 @@ void Resolver::declare(const Token& name) {
 
 	scope[name.lexeme] = false;
 }
-void Resolver::define(const Token& name) {
+void Resolver::define(const std::string& name) {
 	if (m_scopes.empty()) {
 		return;
 	}
 
 	ResolverScope& scope = m_scopes.back();
-	scope[name.lexeme] = true;
+	scope[name] = true;
 }
 
 
@@ -113,6 +114,9 @@ void Resolver::visit(const ReturnStatement& s) {
 		report_error(s.keyword.line, "Cannot return from outside of functions.");
 	}
 	if (s.value) {
+		if (m_current_function == FunctionType::INITIALIZER) {
+			report_error(s.keyword.line, "Cannot return a value from initializer.");
+		}
 		resolve(s.value);
 	}
 }
@@ -145,6 +149,29 @@ void Resolver::visit(const ForStatement& s) {
 	end_scope();
 
 	m_current_loop = enclosing_loop;
+}
+
+void Resolver::visit(const ClassStatement& s) {
+	ClassType enclosing_class = m_current_class;
+	m_current_class = ClassType::CLASS;
+
+	declare(s.name);
+	define(s.name);
+
+	begin_scope();
+	define("this");
+
+	for (const Ref<FunctionStatement>& method : s.methods) {
+		FunctionType declaration = FunctionType::METHOD;
+		if (method->name.lexeme == s.name.lexeme) {
+			declaration = FunctionType::INITIALIZER;
+		}
+		resolve_function(*method.get(), declaration);
+	}
+
+	end_scope();
+
+	m_current_class = enclosing_class;
 }
 
 
@@ -185,6 +212,20 @@ void Resolver::visit(const LogicalExpression& e) {
 }
 void Resolver::visit(const UnaryExpression& e) {
 	resolve(e.right);
+}
+void Resolver::visit(const GetExpression& e) {
+	resolve(e.object);
+}
+void Resolver::visit(const SetExpression& e) {
+	resolve(e.value);
+	resolve(e.object);
+}
+void Resolver::visit(const ThisExpression& e) {
+	if (m_current_class == ClassType::NONE) {
+		report_error(e.keyword.line, "Cannot use 'this' outside of a class.");
+		return;
+	}
+	resolve_local(e, e.keyword);
 }
 
 }

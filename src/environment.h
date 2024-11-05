@@ -15,12 +15,9 @@ public:
 	Environment() : enclosing(nullptr) {}
 	Environment(const Ref<Environment>& enclosing) : enclosing(enclosing) {}
 
-	bool exists(const Token& name) {
-		return values.count(name.lexeme) > 0;
-	}
 
 	void define(const Token& name, const Object& value) {
-		if (exists(name)) {
+		if (values.count(name.lexeme) > 0) {
 			throw InterpreterException(name, "Redefinition of '" + name.lexeme + "'.");
 		}
 		values.emplace(name.lexeme, value);

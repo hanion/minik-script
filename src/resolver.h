@@ -9,15 +9,9 @@ namespace minik {
 
 using ResolverScope = std::unordered_map<std::string, bool>;
 
-enum class FunctionType {
-	NONE,
-	FUNCTION
-};
-
-enum class LoopType {
-	NONE,
-	FOR
-};
+enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
+enum class LoopType { NONE, FOR };
+enum class ClassType { NONE, CLASS };
 
 class Resolver : public Visitor {
 public:
@@ -31,6 +25,9 @@ public:
 	virtual void visit(const AssignmentExpression& e) override;
 	virtual void visit(const LogicalExpression& e)    override;
 	virtual void visit(const CallExpression& e)       override;
+	virtual void visit(const GetExpression& e)        override;
+	virtual void visit(const SetExpression& e)        override;
+	virtual void visit(const ThisExpression& e)       override;
 
 	virtual void visit(const ExpressionStatement& s) override;
 	virtual void visit(const PrintStatement& s)      override;
@@ -42,6 +39,7 @@ public:
 	virtual void visit(const ContinueStatement& s)   override;
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
+	virtual void visit(const ClassStatement& s)      override;
 
 	void resolve_block(const std::vector<Ref<Statement>>& statements);
 private:
@@ -55,7 +53,8 @@ private:
 	void end_scope();
 
 	void declare(const Token& name);
-	void define(const Token& name);
+	void define(const Token& name) { define(name.lexeme); }
+	void define(const std::string& name);
 
 
 
@@ -64,6 +63,7 @@ private:
 	std::vector<ResolverScope> m_scopes = {};
 	FunctionType m_current_function = FunctionType::NONE;
 	LoopType m_current_loop = LoopType::NONE;
+	ClassType m_current_class = ClassType::NONE;
 
 };
 

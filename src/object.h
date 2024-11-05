@@ -2,6 +2,7 @@
 
 #include "base.h"
 #include "callable.h"
+#include "class.h"
 #include "minik.h"
 #include <cstddef>
 #include <exception>
@@ -9,21 +10,23 @@
 
 namespace minik {
 
-using Value = std::variant<std::nullptr_t, bool, double, std::string, Ref<MinikCallable>>;
+using Value = std::variant<std::nullptr_t, bool, double, std::string, Ref<MinikCallable>, Ref<MinikInstance>>;
 
 struct Object {
-	Value value;
+	Value value = {nullptr};
 
 	bool is_nil()      const { return std::holds_alternative<std::nullptr_t>(value); }
 	bool is_bool()     const { return std::holds_alternative<bool>(value); }
 	bool is_double()   const { return std::holds_alternative<double>(value); }
 	bool is_string()   const { return std::holds_alternative<std::string>(value); }
 	bool is_callable() const { return std::holds_alternative<Ref<MinikCallable>>(value); }
+	bool is_instance() const { return std::holds_alternative<Ref<MinikInstance>>(value); }
 
 	const bool&        as_bool()   const { return std::get<bool>(value); }
 	const double&      as_double() const { return std::get<double>(value); }
 	const std::string& as_string() const { return std::get<std::string>(value); }
 	const Ref<MinikCallable>& as_callable() const { return std::get<Ref<MinikCallable>>(value); }
+	const Ref<MinikInstance>& as_instance() const { return std::get<Ref<MinikInstance>>(value); }
 
 	bool&        as_bool()   { return std::get<bool>(value); }
 	double&      as_double() { return std::get<double>(value); }
@@ -40,6 +43,8 @@ struct Object {
 			return as_string();
 		} else if (is_callable()) {
 			return as_callable()->to_string();
+		} else if (is_instance()) {
+			return as_instance()->to_string();
 		}
 		return "";
 	}

@@ -1,0 +1,30 @@
+// class
+
+Animal :: class {
+	Animal :: (name) {
+		this.name = name;
+	}
+
+	print_name :: () {
+		print this.name;
+	}
+}
+
+print Animal;
+dog := Animal("doug");
+print dog;
+print dog.name;
+print dog.print_name;
+dog.print_name();
+dog.name = "dawg";
+dog.print_name();
+
+
+cat := Animal("kat");
+cat.print_name();
+cat.name = "kath";
+cat.print_name();
+
+
+Animal("fish").print_name();
+

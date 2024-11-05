@@ -1,0 +1,9 @@
+<class Animal>
+<instance of Animal>
+doug
+<fn print_name>
+doug
+dawg
+kat
+kath
+fish

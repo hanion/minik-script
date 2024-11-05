@@ -93,4 +93,34 @@ struct CallExpression : public Expression {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct GetExpression : public Expression {
+	Ref<Expression> object;
+	Token name;
+
+	GetExpression(Ref<Expression> object, Token name)
+		: object(object), name(name) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+struct SetExpression : public Expression {
+	Ref<Expression> object;
+	Ref<Expression> value;
+	Token name;
+
+	SetExpression(Ref<Expression> object, Ref<Expression> value, Token name)
+		: object(object), value(value), name(name) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct ThisExpression : public Expression {
+	Token keyword;
+
+	ThisExpression(Token keyword)
+		: keyword(keyword) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+
 }

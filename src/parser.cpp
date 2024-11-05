@@ -88,7 +88,9 @@ Ref<Expression> Parser::assignment() {
 		if (VariableExpression* var_expr = dynamic_cast<VariableExpression*>(expr.get())) {
 			Token name = var_expr->name;
 			return CreateRef<AssignmentExpression>(name, value);
-		 }
+		} else if (GetExpression* get_expr = dynamic_cast<GetExpression*>(expr.get())) {
+			return CreateRef<SetExpression>(get_expr->object, value, get_expr->name);
+		}
 
 		 report_error(equals.line, "Invalid assignment target."); 
 	}
@@ -162,6 +164,10 @@ Ref<Expression> Parser::primary() {
 		return CreateRef<LiteralExpression>(previous().literal);
 	}
 
+	if (match(THIS)) {
+		return CreateRef<ThisExpression>(previous());
+	}
+
 	if (match(IDENTIFIER)) {
 		return CreateRef<VariableExpression>(previous());
 	}
@@ -205,6 +211,9 @@ Ref<Expression> Parser::call() {
 	while (true) {
 		if (match(LEFT_PAREN)) {
 			expr = finish_call(expr);
+		} else if (match(DOT)) {
+			Token name = consume(IDENTIFIER, "Expected property name after '.'.");
+			expr = CreateRef<GetExpression>(expr, name);
 		} else {
 			break;
 		}
@@ -326,6 +335,10 @@ Ref<Statement> Parser::typed_declaration() {
 			if (check_next(LEFT_PAREN)) {
 				match(COLON);
 				return function(identifier);
+			} else if (check_next(CLASS)) {
+				match(COLON);
+				match(CLASS);
+				return class_declaration(identifier);
 			}
 		}
 	}
@@ -417,7 +430,7 @@ Ref<Statement> Parser::continue_statement() {
 	return CreateRef<ContinueStatement>(token);
 }
 
-Ref<Statement> Parser::function(const Token& identifier) {
+Ref<FunctionStatement> Parser::function(const Token& identifier) {
 	consume(LEFT_PAREN, "Expected '(' at function declaration.");
 	std::vector<Token> parameters = {};
 	if (!check(RIGHT_PAREN)) {
@@ -444,6 +457,23 @@ Ref<Statement> Parser::return_statement() {
 	}
 	consume(SEMICOLON, "Expected ';' after return value.");
 	return CreateRef<ReturnStatement>(keyword, value);
+}
+
+Ref<Statement> Parser::class_declaration(const Token& identifier) {
+	consume(LEFT_BRACE, "Expected '{' after class declaration.");
+
+	std::vector<Ref<FunctionStatement>> methods = {};
+	while (!check(RIGHT_BRACE) && !is_at_end()) {
+		if (check(IDENTIFIER)) {
+			Token id = consume(IDENTIFIER, "Expected identifier.");
+			match(COLON);
+			match(COLON);
+			methods.push_back(function(id));
+		}
+	}
+
+	consume(RIGHT_BRACE, "Expected '}' after class body.");
+	return CreateRef<ClassStatement>(identifier, methods);
 }
 
 }
