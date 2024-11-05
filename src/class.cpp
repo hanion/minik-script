@@ -3,6 +3,7 @@
 #include "object.h"
 #include "token.h"
 #include "function.h"
+#include "interpreter.h"
 
 
 namespace minik {
@@ -10,6 +11,15 @@ namespace minik {
 
 Object MinikClass::call(Interpreter& interpreter, const std::vector<Object>& arguments) {
 	Ref<MinikInstance> instance = CreateRef<MinikInstance>(*this);
+
+	for (const auto& member : members) {
+		VariableStatement& vs = *member.second.get();
+		Object value;
+		if (vs.initializer) {
+			value = interpreter.evaluate(vs.initializer);
+		}
+		instance->fields[member.first] = CreateRef<Object>(value);
+	}
 
 	Ref<MinikFunction> initializer = find_method(name);
 	if (initializer) {
@@ -50,6 +60,9 @@ Object MinikInstance::get(const Token& name, const Ref<MinikInstance>& self) {
 }
 
 void MinikInstance::set(const Token& name, const Ref<Object>& value) {
+	if (fields.count(name.lexeme) == 0) {
+		throw InterpreterException(name, "Couldn't find field '"+name.lexeme+"' in instance.");
+	}
 	fields[name.lexeme] = value;
 }
 

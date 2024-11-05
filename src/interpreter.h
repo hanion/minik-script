@@ -61,6 +61,7 @@ private:
 	std::unordered_map<const Expression*, int> m_locals = {};
 	Object m_result;
 friend MinikFunction;
+friend MinikClass;
 };
 
 }

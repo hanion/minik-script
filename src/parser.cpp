@@ -328,6 +328,9 @@ Ref<Statement> Parser::typed_declaration() {
 
 	if (match(COLON)) {
 		// TODO: type
+		if (match(IDENTIFIER)) {
+			// NOTE: this should not be IDENTIFIER, but a type
+		}
 
 		// second colon
 		if (check(COLON)) {
@@ -440,6 +443,10 @@ Ref<FunctionStatement> Parser::function(const Token& identifier) {
 			}
 
 			parameters.emplace_back(consume(IDENTIFIER, "Expected parameter name."));
+			if (match(COLON)) {
+				// TODO: parameter type
+				consume(IDENTIFIER, "Expected parameter type after ':'.");
+			}
 		} while (match(COMMA));
 	}
 	consume(RIGHT_PAREN, "Expected ')' after paramaters.");
@@ -463,17 +470,22 @@ Ref<Statement> Parser::class_declaration(const Token& identifier) {
 	consume(LEFT_BRACE, "Expected '{' after class declaration.");
 
 	std::vector<Ref<FunctionStatement>> methods = {};
+	std::vector<Ref<VariableStatement>> members = {};
 	while (!check(RIGHT_BRACE) && !is_at_end()) {
-		if (check(IDENTIFIER)) {
-			Token id = consume(IDENTIFIER, "Expected identifier.");
-			match(COLON);
-			match(COLON);
-			methods.push_back(function(id));
+		if (check(IDENTIFIER) && check_next(COLON)) {
+			Ref<Statement> s = typed_declaration();
+			if (auto vs = std::dynamic_pointer_cast<VariableStatement>(s)) {
+				members.push_back(vs);
+			} else if (auto fs = std::dynamic_pointer_cast<FunctionStatement>(s)) {
+				methods.push_back(fs);
+			}
+		} else {
+			break;
 		}
 	}
 
 	consume(RIGHT_BRACE, "Expected '}' after class body.");
-	return CreateRef<ClassStatement>(identifier, methods);
+	return CreateRef<ClassStatement>(identifier, methods, members);
 }
 
 }

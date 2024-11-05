@@ -7,12 +7,15 @@
 namespace minik {
 
 class MinikFunction;
+class VariableStatement;
 using MethodsMap = std::unordered_map<std::string, Ref<MinikFunction>>;
+using MembersMap = std::unordered_map<std::string, Ref<VariableStatement>>;
 
 
 class MinikClass : public MinikCallable {
 public:
-	MinikClass(const std::string name, const MethodsMap& methods) : name(name), methods(methods) {}
+	MinikClass(const std::string name, const MethodsMap& methods, const MembersMap& members)
+		: name(name), methods(methods), members(members) {}
 
 	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
 	virtual int arity() override;
@@ -23,6 +26,7 @@ public:
 public:
 	const std::string name;
 	MethodsMap methods;
+	MembersMap members;
 };
 
 

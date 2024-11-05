@@ -1,6 +1,8 @@
 // class
 
 Animal :: class {
+	name: string;
+
 	Animal :: (name) {
 		this.name = name;
 	}

@@ -164,7 +164,12 @@ void Interpreter::visit(const ClassStatement& s) {
 		methods[method->name.lexeme] = CreateRef<MinikFunction>(*method.get(), m_environment, is_initializer);
 	}
 
- 	m_environment->get(s.name).value = CreateRef<MinikClass>(s.name.lexeme, methods);
+	MembersMap members(s.members.size());
+	for (const Ref<VariableStatement>& member : s.members) {
+		members[member->name.lexeme] = member;
+	}
+
+ 	m_environment->get(s.name).value = CreateRef<MinikClass>(s.name.lexeme, methods, members);
 }
 
 void Interpreter::visit(const UnaryExpression& e) {
