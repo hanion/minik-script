@@ -90,6 +90,8 @@ Ref<Expression> Parser::assignment() {
 			return CreateRef<AssignmentExpression>(name, value);
 		} else if (GetExpression* get_expr = dynamic_cast<GetExpression*>(expr.get())) {
 			return CreateRef<SetExpression>(get_expr->object, value, get_expr->name);
+		} else if (SubscriptExpression* sbs = dynamic_cast<SubscriptExpression*>(expr.get())) {
+			return CreateRef<SetSubscriptExpression>(sbs->object, sbs->key, value, sbs->name);
 		}
 
 		 report_error(equals.line, "Invalid assignment target."); 
@@ -178,9 +180,27 @@ Ref<Expression> Parser::primary() {
 		return CreateRef<GroupingExpression>(expr);
 	}
 
+	if (match(LEFT_BRACKET)) {
+		return array_initializer();
+	}
+
 	throw ParseException(peek(), "Expected expression.");
 	return nullptr;
 }
+
+Ref<Expression> Parser::array_initializer() {
+	std::vector<Ref<Expression>> elements;
+	// check empty, []
+	if (!check(RIGHT_BRACKET)) {
+		do {
+			elements.push_back(expression());
+		} while (match(COMMA));
+	}
+
+	consume(RIGHT_BRACKET, "Expect ']' after array elements.");
+	return CreateRef<ArrayInitializerExpression>(elements, previous());
+}
+
 
 Ref<Expression> Parser::logical_or() {
 	Ref<Expression> expr = logical_and();
@@ -214,6 +234,12 @@ Ref<Expression> Parser::call() {
 		} else if (match(DOT)) {
 			Token name = consume(IDENTIFIER, "Expected property name after '.'.");
 			expr = CreateRef<GetExpression>(expr, name);
+		} else if (check(LEFT_BRACKET)) {
+			Token name = previous();
+			match(LEFT_BRACKET);
+			Ref<Expression> key = expression();
+			consume(RIGHT_BRACKET, "Expected ']' after subscript expression.");
+			expr = CreateRef<SubscriptExpression>(expr, key, name);
 		} else {
 			break;
 		}

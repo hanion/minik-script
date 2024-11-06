@@ -11,6 +11,7 @@
 #include "token.h"
 #include "callable.h"
 #include <cassert>
+#include <cstddef>
 #include <string>
 #include <chrono>
 
@@ -142,6 +143,77 @@ void Interpreter::visit(const ThisExpression& e) {
 	m_result = look_up_variable(e.keyword, e);
 }
 
+void Interpreter::visit(const SubscriptExpression& e) {
+	Object object = evaluate(e.object);
+	Object key = evaluate(e.key);
+	
+	if (!key.is_double()) {
+		throw InterpreterException(e.name, "List indices must be of type double.");
+	}
+	const double& index = key.as_double();
+
+	if (object.is_list()) {
+		const List& list = object.as_list();
+		if (index < 0 || index >= list.size()) {
+			throw InterpreterException(e.name, "List index out of bounds. The index " + std::to_string(index) + " is outside the valid range of 0 to " + std::to_string(list.size() - 1) + ".");
+		}
+		m_result = *list.at(static_cast<size_t>(index)).get();
+		return;
+	} else if (object.is_string()) {
+		const std::string& str = object.as_string();
+		if (index < 0 || index >= str.size()) {
+			throw InterpreterException(e.name, "String index out of bounds. The index " + std::to_string(index) + " is outside the valid range of 0 to " + std::to_string(str.size() - 1) + ".");
+		}
+		m_result = Object{str.substr(static_cast<size_t>(index),1)};
+		return;
+	}
+
+	throw InterpreterException(e.name, "Attempted to index a non-list or non-string type.");
+}
+
+void Interpreter::visit(const ArrayInitializerExpression& e) {
+	List list = {};
+	for (const auto& element : e.elements) {
+		list.push_back(CreateRef<Object>(evaluate(element)));
+	}
+	m_result = Object{list};
+}
+
+void Interpreter::visit(const SetSubscriptExpression& e) {
+	Object object = evaluate(e.object);
+	Object index = evaluate(e.index);
+	Object value = evaluate(e.value);
+
+	if (!index.is_double()) {
+		throw InterpreterException(e.name, "List indices must be of type double.");
+	}
+	if (index.as_double() < 0) {
+		throw InterpreterException(e.name, "List index '"+std::to_string(index.as_double())+"' is out of bounds.");
+	}
+	const size_t idx = static_cast<size_t>(index.as_double());
+
+	if (object.is_list()) {
+		if (idx >= object.as_list().size()) {
+			throw InterpreterException(e.name, "String index out of bounds. The index " + std::to_string(idx) + " is outside the valid range of 0 to " + std::to_string(object.as_list().size() - 1) + ".");
+		}
+		object.as_list().at(idx)->value = value.value;
+		m_result = object;
+		return;
+	}
+
+	if (object.is_string()) {
+		std::string str = value.to_string();
+		if (str.size() > 0) {
+			object.as_string().at(idx) = str.at(0);
+			m_result = object;
+			return;
+		}
+	}
+
+	throw InterpreterException(e.name, "Attempted to index a non-list or non-string type.");
+}
+
+
 void Interpreter::visit(const FunctionStatement& s) {
 	Ref<MinikFunction> function = CreateRef<MinikFunction>(s, m_environment);
 	m_environment->define(s.name, Object{function});
@@ -187,10 +259,8 @@ void Interpreter::visit(const UnaryExpression& e) {
 			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
 		case PLUS_PLUS: {
 			if (right.is_double()) {
-				auto var = dynamic_cast<const VariableExpression*>(e.right.get());
-				if (var) {
-					const Token& varName = var->name;
-					Object& value = m_environment->get(varName);
+				if (auto var = dynamic_cast<const VariableExpression*>(e.right.get())) {
+					Object& value = m_environment->get(var->name);
 					value = Object{right.as_double()+1};
 					m_result = value;
 					return;

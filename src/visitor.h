@@ -13,6 +13,9 @@ class CallExpression;
 class GetExpression;
 class SetExpression;
 class ThisExpression;
+class SubscriptExpression;
+class ArrayInitializerExpression;
+class SetSubscriptExpression;
 
 class ExpressionStatement;
 class PrintStatement;
@@ -41,6 +44,9 @@ public:
 	virtual void visit(const GetExpression& e) {}
 	virtual void visit(const SetExpression& e) {}
 	virtual void visit(const ThisExpression& e) {}
+	virtual void visit(const SubscriptExpression& e) {}
+	virtual void visit(const ArrayInitializerExpression& e) {}
+	virtual void visit(const SetSubscriptExpression& e) {}
 
 
 	virtual void visit(const ExpressionStatement& s) {}

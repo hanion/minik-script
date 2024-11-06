@@ -122,5 +122,38 @@ struct ThisExpression : public Expression {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct SubscriptExpression : public Expression {
+	Ref<Expression> object;
+	Ref<Expression> key;
+	Token name;
+
+	SubscriptExpression(const Ref<Expression>& object, const Ref<Expression>& key, const Token& name)
+		: object(object), key(key), name(name) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct ArrayInitializerExpression : public Expression {
+	std::vector<Ref<Expression>> elements;
+	Token paren;
+
+	ArrayInitializerExpression(const std::vector<Ref<Expression>>& elements, Token paren)
+		: elements(elements), paren(paren) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct SetSubscriptExpression : public Expression {
+	Ref<Expression> object;
+	Ref<Expression> index;
+	Ref<Expression> value;
+	Token name;
+
+	SetSubscriptExpression(Ref<Expression> object, Ref<Expression> index, Ref<Expression> value, Token name)
+		: object(object), index(index), value(value), name(name) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 
 }

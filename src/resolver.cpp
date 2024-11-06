@@ -228,5 +228,22 @@ void Resolver::visit(const ThisExpression& e) {
 	resolve_local(e, e.keyword);
 }
 
+void Resolver::visit(const SubscriptExpression& e) {
+	resolve(e.object);
+	resolve(e.key);
+}
+
+void Resolver::visit(const ArrayInitializerExpression& e) {
+	for (const auto& element : e.elements) {
+		resolve(element);
+	}
+}
+
+void Resolver::visit(const SetSubscriptExpression& e) {
+	resolve(e.object);
+	resolve(e.index);
+	resolve(e.value);
+}
+
 }
 

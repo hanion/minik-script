@@ -39,6 +39,7 @@ private:
 	Ref<Expression> logical_and();
 	Ref<Expression> call();
 	Ref<Expression> finish_call(const Ref<Expression>& callee);
+	Ref<Expression> array_initializer();
 
 	void synchronize();
 

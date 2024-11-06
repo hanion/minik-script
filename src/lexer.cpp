@@ -46,6 +46,8 @@ void Lexer::scan_token() {
 		case ')': add_token(RIGHT_PAREN); break;
 		case '{': add_token(LEFT_BRACE); break;
 		case '}': add_token(RIGHT_BRACE); break;
+		case '[': add_token(LEFT_BRACKET); break;
+		case ']': add_token(RIGHT_BRACKET); break;
 		case ',': add_token(COMMA); break;
 		case '.': add_token(DOT); break;
 		case '-':

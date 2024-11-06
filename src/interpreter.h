@@ -27,6 +27,9 @@ public:
 	virtual void visit(const GetExpression& e)        override;
 	virtual void visit(const SetExpression& e)        override;
 	virtual void visit(const ThisExpression& e)       override;
+	virtual void visit(const SubscriptExpression& e)  override;
+	virtual void visit(const ArrayInitializerExpression& e) override;
+	virtual void visit(const SetSubscriptExpression& e) override;
 
 	virtual void visit(const ExpressionStatement& s) override;
 	virtual void visit(const PrintStatement& s)      override;
