@@ -86,21 +86,19 @@ const static std::string token_type_to_string(TokenType type) {
 }
 
 
-struct Literal : Object {};
-
 class Token {
 public:
 	TokenType type;
 	std::string lexeme;
-	Literal literal;
+	Ref<Object> literal;
 	uint32_t line;
 
-	Token(TokenType type, std::string lexeme, Literal literal, uint32_t line)
+	Token(TokenType type, std::string lexeme, Ref<Object> literal, uint32_t line)
 		: type(type), lexeme(lexeme), literal(literal), line(line) {}
 
 
 	std::string to_string() const {
-		return token_type_to_string(type) + " " + lexeme + " " + literal.to_string();
+		return token_type_to_string(type) + " " + lexeme + " " + literal->to_string();
 	}
 
 };

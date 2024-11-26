@@ -13,7 +13,7 @@ public:
 
 	virtual int arity() override;
 	virtual std::string to_string() const override;
-	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
+	virtual Ref<Object> call(Interpreter& interpreter, const std::vector<Ref<Object>>& arguments) override;
 
 	Ref<MinikFunction> bind(const Ref<MinikInstance>& instance);
 

@@ -33,7 +33,7 @@ std::vector<Token>& Lexer::scan_tokens() {
 		scan_token();
 	}
 
-	m_tokens.emplace_back(MEOF, "", Literal{}, m_line);
+	m_tokens.emplace_back(MEOF, "", CreateRef<Object>(nullptr), m_line);
 
 	return m_tokens;
 }
@@ -107,11 +107,11 @@ char Lexer::advance() {
 	return m_source.at(m_current++);
 }
 void Lexer::add_token(TokenType type) {
-	add_token(type, {});
+	add_token(type, CreateRef<Object>(nullptr));
 }
-void Lexer::add_token(TokenType type, Literal literal) {
+void Lexer::add_token(TokenType type, Object literal) {
 	std::string text = substr(m_start, m_current);
-	m_tokens.emplace_back(type, text, literal, m_line);
+	m_tokens.emplace_back(type, text, CreateRef<Object>(literal), m_line);
 }
 
 bool Lexer::match(char expected) {

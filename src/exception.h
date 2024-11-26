@@ -30,8 +30,13 @@ public:
 		report_error(token.line, message + " at: '" + object.to_string() + "'.");
 	}
 	InterpreterException(const Token& token, const std::string& message)
-		: token(token), object({}), msg(message) {
+		: token(token), object(false), msg(message) {
 		report_error(token.line, message);
+	}
+
+	InterpreterException(const Token& token, const Ref<Object>& object, const std::string& message)
+		: token(token), object(*object.get()), msg(message) {
+		report_error(token.line, message + " at: '" + object->to_string() + "'.");
 	}
 	virtual const char* what() const noexcept override { return msg.c_str(); }
 };
@@ -48,7 +53,7 @@ struct ContinueException {};
 struct AssertException {};
 
 struct ReturnException {
-	Object value;
+	Ref<Object> value;
 };
 
 }

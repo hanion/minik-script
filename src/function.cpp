@@ -10,7 +10,7 @@ namespace minik {
 
 static const Token THIS_TOKEN = {IDENTIFIER, "this", {}, 0};
 
-Object MinikFunction::call(Interpreter& interpreter, const std::vector<Object>& arguments) {
+Ref<Object> MinikFunction::call(Interpreter& interpreter, const std::vector<Ref<Object>>& arguments) {
 	Ref<Environment> env = CreateRef<Environment>(m_closure);
 	for (int i = 0; i < m_declaration.params.size(); i++) {
 		env->define(m_declaration.params[i], arguments[i]);
@@ -28,7 +28,7 @@ Object MinikFunction::call(Interpreter& interpreter, const std::vector<Object>& 
 	if (m_is_initializer) {
 		return m_closure->get_at(0,THIS_TOKEN);
 	}
-	return {};
+	return nullptr;
 }
 
 int MinikFunction::arity() {
@@ -41,7 +41,7 @@ std::string MinikFunction::to_string() const {
 
 Ref<MinikFunction> MinikFunction::bind(const Ref<MinikInstance>& instance) {
 	Ref<Environment> env = CreateRef<Environment>(m_closure);
-	env->define(THIS_TOKEN, Object{instance});
+	env->define(THIS_TOKEN, CreateRef<Object>(instance));
 	return CreateRef<MinikFunction>(m_declaration, env, m_is_initializer);
 }
 

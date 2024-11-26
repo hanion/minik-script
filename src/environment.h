@@ -15,15 +15,14 @@ public:
 	Environment() : enclosing(nullptr) {}
 	Environment(const Ref<Environment>& enclosing) : enclosing(enclosing) {}
 
-
-	void define(const Token& name, const Object& value) {
+	void define(const Token& name, const Ref<Object>& value) {
 		if (values.count(name.lexeme) > 0) {
 			throw InterpreterException(name, "Redefinition of '" + name.lexeme + "'.");
 		}
 		values.emplace(name.lexeme, value);
 	}
 
-	Object& get(const Token& name) {
+	Ref<Object> get(const Token& name) {
 		auto it = values.find(name.lexeme);
 		if (it != values.end()) {
 			return it->second;
@@ -36,7 +35,7 @@ public:
 		throw InterpreterException(name, "Undefined variable '" + name.lexeme + "'.");
 	}
 
-	Object& get_at(int distance, const Token& name) {
+	Ref<Object> get_at(int distance, const Token& name) {
 		Environment& env = ancestor(distance);
 
 		auto it = env.values.find(name.lexeme);
@@ -45,10 +44,9 @@ public:
 		}
 
 		// UNREACHABLE
-		MN_ERROR("Environment::get_at Interpreter couldn't find token in environment. [line %d] (distance %d, token '%s')",
-		   name.line, distance, name.lexeme.c_str());
-		assert(false);
-		return *CreateRef<Object>().get();
+		throw InterpreterException(name,
+			"Environment::get_at Interpreter couldn't find token in environment. [line "
+				+std::to_string(name.line)+"] (distance "+std::to_string(distance)+", token '"+name.lexeme+"')");
 	}
 
 	Environment& ancestor(int distance) {
@@ -62,7 +60,7 @@ public:
 
 private:
 	Ref<Environment> enclosing;
-	std::unordered_map<std::string, Object> values = {};
+	std::unordered_map<std::string, Ref<Object>> values = {};
 };
 
 }

@@ -5,3 +5,12 @@ print true  and 2; // 2
 print false or 2;  // 2
 print true  or 2;  // true
 print false or true and "this"; // "this"
+
+a := true;
+c := a or "does not matter";
+assert(a == true);
+assert(c == true);
+c = false;
+assert(a == true);
+assert(c == false);
+

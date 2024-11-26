@@ -48,12 +48,12 @@ public:
 	void resolve(const Expression& expression, int depth);
 
 private:
-	Object look_up_variable(const Token& name, const Expression& expression);
+	Ref<Object> look_up_variable(const Token& name, const Expression& expression);
 
-	Object evaluate(const Ref<Expression>& expression);
-	bool is_equal(const Token& token, const Object& a, const Object& b) const;
-	bool is_truthy(const Token& token, const Object& object) const;
-	bool is_truthy(const Object& object) const;
+	Ref<Object> evaluate(const Ref<Expression>& expression);
+	bool is_equal(const Token& token, const Ref<Object>& a, const Ref<Object>& b) const;
+	bool is_truthy(const Token& token, const Ref<Object>& object) const;
+	bool is_truthy(const Ref<Object>& object) const;
 	void execute(const Ref<Statement>& statement);
 	void execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment);
 
@@ -62,7 +62,7 @@ private:
 	Ref<Environment> m_globals = CreateRef<Environment>();
 	Ref<Environment> m_environment = m_globals;
 	std::unordered_map<const Expression*, int> m_locals = {};
-	Object m_result;
+	Ref<Object> m_result = nullptr;
 friend MinikFunction;
 friend MinikClass;
 };

@@ -9,16 +9,16 @@
 namespace minik {
 
 
-Object MinikClass::call(Interpreter& interpreter, const std::vector<Object>& arguments) {
+Ref<Object> MinikClass::call(Interpreter& interpreter, const std::vector<Ref<Object>>& arguments) {
 	Ref<MinikInstance> instance = CreateRef<MinikInstance>(*this);
 
 	for (const auto& member : members) {
 		VariableStatement& vs = *member.second.get();
-		Object value;
+		Ref<Object> value;
 		if (vs.initializer) {
 			value = interpreter.evaluate(vs.initializer);
 		}
-		instance->fields[member.first] = CreateRef<Object>(value);
+		instance->fields[member.first] = value;
 	}
 
 	Ref<MinikFunction> initializer = find_method(name);
@@ -26,7 +26,7 @@ Object MinikClass::call(Interpreter& interpreter, const std::vector<Object>& arg
 		initializer->bind(instance)->call(interpreter, arguments);
 	}
 	
-	return { instance };
+	return CreateRef<Object>(instance);
 }
 int MinikClass::arity() {
 	Ref<MinikFunction> initializer = find_method(name);
@@ -45,15 +45,15 @@ Ref<MinikFunction> MinikClass::find_method(const std::string& name) {
 	return nullptr;
 }
 
-Object MinikInstance::get(const Token& name, const Ref<MinikInstance>& self) {
+Ref<Object> MinikInstance::get(const Token& name, const Ref<MinikInstance>& self) {
 	auto it = fields.find(name.lexeme);
 	if (it != fields.end()) {
-		return *it->second.get();
+		return it->second;
 	}
 
 	Ref<MinikFunction> fn = clas.find_method(name.lexeme);
 	if (fn) {
-		return Object{fn->bind(self)};
+		return CreateRef<Object>(fn->bind(self));
 	}
 
 	throw InterpreterException(name, "Undefined property '"+name.lexeme+"' in '"+clas.name+"'.");

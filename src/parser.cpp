@@ -158,9 +158,9 @@ Ref<Expression> Parser::unary() {
 }
 
 Ref<Expression> Parser::primary() {
-	if (match(FALSE)) { return CreateRef<LiteralExpression>(Literal{false}); }
-	if (match(TRUE))  { return CreateRef<LiteralExpression>(Literal{true}); }
-	if (match(NIL))   { return CreateRef<LiteralExpression>(Literal{nullptr}); }
+	if (match(FALSE)) { return CreateRef<LiteralExpression>(CreateRef<Object>(false)); }
+	if (match(TRUE))  { return CreateRef<LiteralExpression>(CreateRef<Object>(true)); }
+	if (match(NIL))   { return CreateRef<LiteralExpression>(CreateRef<Object>(nullptr)); }
 
 	if (match(NUMBER) || match(STRING)) {
 		return CreateRef<LiteralExpression>(previous().literal);
@@ -434,7 +434,7 @@ Ref<Statement> Parser::for_statement() {
 		condition = expression();
 	}
 	if (condition == nullptr) {
-		condition = CreateRef<LiteralExpression>(Literal{true});
+		condition = CreateRef<LiteralExpression>(CreateRef<Object>(true));
 	}
 
 	consume(SEMICOLON, "Expected ';' after loop condition.");

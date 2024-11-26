@@ -10,12 +10,23 @@
 
 namespace minik {
 
-// TODO: should not copy strings, should hold Ref<std::string> instead
 using List = std::vector<Ref<Object>>;
 using Value = std::variant<std::nullptr_t, bool, double, std::string, Ref<MinikCallable>, Ref<MinikInstance>, List>;
 
 struct Object {
 	Value value = {nullptr};
+
+	Object() : value(nullptr) {}
+	Object(void*) : value(nullptr) {}
+	Object(bool val) : value(val) {}
+	Object(double val) : value(val) {}
+	Object(std::string val) : value(val) {}
+	Object(Ref<MinikCallable> val) : value(val) {}
+	Object(Ref<MinikInstance> val) : value(val) {}
+	Object(List val) : value(val) {}
+
+	Object(Object const &val) : value(val.value) {}
+	Object(const Ref<Object>& val) : value(val->value) {}
 
 	bool is_nil()      const { return std::holds_alternative<std::nullptr_t>(value); }
 	bool is_bool()     const { return std::holds_alternative<bool>(value); }
@@ -86,20 +97,20 @@ struct Object {
 		return false;
 	}
 
-	bool equals(const Object& other) const {
-		if (is_nil() && other.is_nil()) {
+	bool equals(const Ref<Object>& other) const {
+		if (is_nil() && other->is_nil()) {
 			return true;
 		}
-		if (is_bool() && other.is_bool()) {
-			return (as_bool() == other.as_bool());
+		if (is_bool() && other->is_bool()) {
+			return (as_bool() == other->as_bool());
 		}
-		if (is_double() && other.is_double()) {
-			return (as_double() == other.as_double());
+		if (is_double() && other->is_double()) {
+			return (as_double() == other->as_double());
 		}
-		if (is_string() && other.is_string()) {
-			return (as_string() == other.as_string());
+		if (is_string() && other->is_string()) {
+			return (as_string() == other->as_string());
 		}
-		return (to_bool() == other.to_bool());
+		return (to_bool() == other->to_bool());
 	}
 };
 

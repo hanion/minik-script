@@ -9,10 +9,12 @@ class Object;
 class Interpreter;
 class Token;
 
+using Arguments = std::vector<Ref<Object>>;
+
 class MinikCallable {
 public:
 	virtual ~MinikCallable() = default;
-	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments);
+	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments);
 	virtual int arity() { return 0; }
 	virtual std::string to_string() const { return "<fn>"; }
 };
@@ -21,14 +23,14 @@ class mcClock : public MinikCallable {
 public:
 	virtual int arity() override { return 0; }
 	virtual std::string to_string() const override { return "<fn native clock>"; }
-	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
+	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
 };
 
 class mcAssert : public MinikCallable {
 public:
 	virtual int arity() override { return -1; }
 	virtual std::string to_string() const override { return "<fn native assert>"; }
-	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
+	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
 };
 
 }

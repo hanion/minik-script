@@ -17,7 +17,7 @@ public:
 	MinikClass(const std::string name, const MethodsMap& methods, const MembersMap& members)
 		: name(name), methods(methods), members(members) {}
 
-	virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) override;
+	virtual Ref<Object> call(Interpreter& interpreter, const std::vector<Ref<Object>>& arguments) override;
 	virtual int arity() override;
 	virtual std::string to_string() const override { return "<class " + name + ">"; }
 
@@ -34,7 +34,7 @@ class MinikInstance {
 public:
 	MinikInstance(const MinikClass& clas) : clas(clas) {}
 
-	Object get(const Token& name, const Ref<MinikInstance>& self);
+	Ref<Object> get(const Token& name, const Ref<MinikInstance>& self);
 	void set(const Token& name, const Ref<Object>& value);
 
 	std::string to_string() const { return "<instance of " + clas.name + ">"; }

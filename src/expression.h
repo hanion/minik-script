@@ -14,9 +14,9 @@ struct Expression {
 
 
 struct LiteralExpression : public Expression {
-	Literal value;
+	Ref<Object> value;
 
-	LiteralExpression(Literal val)
+	LiteralExpression(Ref<Object> val)
 		: value(val) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }

@@ -18,8 +18,8 @@
 namespace minik {
 
 Interpreter::Interpreter() {
-	m_globals->define(Token(IDENTIFIER, "clock", {}, 0), Object{ CreateRef<mcClock>() });
-	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), Object{ CreateRef<mcAssert>() });
+	m_globals->define(Token(IDENTIFIER, "clock", {}, 0), CreateRef<Object>( CreateRef<mcClock>() ));
+	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), CreateRef<Object>( CreateRef<mcAssert>() ));
 }
 
 
@@ -39,7 +39,7 @@ void Interpreter::resolve(const Expression& expression, int depth) {
 	m_locals[&expression] = depth;
 }
 
-Object Interpreter::look_up_variable(const Token& name, const Expression& expression) {
+Ref<Object> Interpreter::look_up_variable(const Token& name, const Expression& expression) {
 	auto it = m_locals.find(&expression);
 	if (it != m_locals.end()) {
 		int distance = it->second;
@@ -50,7 +50,7 @@ Object Interpreter::look_up_variable(const Token& name, const Expression& expres
 
 
 void Interpreter::visit(const LiteralExpression& e) {
-	m_result = e.value;
+	m_result = CreateRef<Object>(e.value);
 }
 
 void Interpreter::visit(const GroupingExpression& e) {
@@ -60,51 +60,54 @@ void Interpreter::visit(const VariableExpression& e) {
 	m_result = look_up_variable(e.name, e);
 }
 void Interpreter::visit(const AssignmentExpression& e) {
-	Object value = evaluate(e.value);
+	Ref<Object> value = evaluate(e.value);
+	Ref<Object> var;
 
 	auto it = m_locals.find(&e);
 	if (it != m_locals.end()) {
 		int distance = it->second;
-		m_environment->get_at(distance, e.name) = value;
+		var = m_environment->get_at(distance, e.name);
+		var->value = value->value;
 	} else {
-		m_globals->get(e.name) = value;
+		var = m_globals->get(e.name);
+		var->value = value->value;
 	}
 
-	m_result = value;
+	m_result = var;
 }
 void Interpreter::visit(const LogicalExpression& e) {
-	Object left = evaluate(e.left);
+	Ref<Object> left = evaluate(e.left);
 
 	if (e.operator_token.type == OR) {
 		if (is_truthy(left)) {
-			m_result = left;
+			m_result = CreateRef<Object>(left);
 			return;
 		}
 	} else if (e.operator_token.type == AND) {
 		if (!is_truthy(left)) {
-			m_result = left;
+			m_result = CreateRef<Object>(left);
 			return;
 		}
 	}
 
-	m_result = evaluate(e.right);
+	m_result = CreateRef<Object>(evaluate(e.right));
 }
 
 void Interpreter::visit(const CallExpression& e) {
-	Object callee = evaluate(e.callee);
+	Ref<Object> callee = evaluate(e.callee);
 
-	std::vector<Object> arguments;
+	std::vector<Ref<Object>> arguments;
 	arguments.reserve(e.arguments.size());
 	for (const Ref<Expression>& argument : e.arguments) {
 		arguments.emplace_back(evaluate(argument));
 	}
 
-	if (!callee.is_callable()) {
-		m_result = {};
+	if (!callee->is_callable()) {
+		m_result = nullptr;
 		throw InterpreterException(e.paren, "Object is not callable.");
 	}
 
-	const Ref<MinikCallable>& function = callee.as_callable();
+	const Ref<MinikCallable>& function = callee->as_callable();
 
 	if (function->arity() != -1 && arguments.size() != function->arity()) {
 		throw InterpreterException(e.paren, "Expected " +
@@ -120,22 +123,22 @@ void Interpreter::visit(const CallExpression& e) {
 }
 
 void Interpreter::visit(const GetExpression& e) {
-	Object object = evaluate(e.object);
-	if (object.is_instance()) {
-		m_result = object.as_instance()->get(e.name, object.as_instance());
+	Ref<Object> object = evaluate(e.object);
+	if (object->is_instance()) {
+		m_result = object->as_instance()->get(e.name, object->as_instance());
 		return;
 	}
 
 	throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
 }
 void Interpreter::visit(const SetExpression& e) {
-	Object object = evaluate(e.object);
-	if (!object.is_instance()) {
+	Ref<Object> object = evaluate(e.object);
+	if (!object->is_instance()) {
 		throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
 	}
 
-	Object value = evaluate(e.value);
-	object.as_instance()->set(e.name, CreateRef<Object>(value));
+	Ref<Object> value = evaluate(e.value);
+	object->as_instance()->set(e.name, CreateRef<Object>(value));
 	m_result = value;
 }
 
@@ -144,27 +147,27 @@ void Interpreter::visit(const ThisExpression& e) {
 }
 
 void Interpreter::visit(const SubscriptExpression& e) {
-	Object object = evaluate(e.object);
-	Object key = evaluate(e.key);
+	Ref<Object> object = evaluate(e.object);
+	Ref<Object> key = evaluate(e.key);
 	
-	if (!key.is_double()) {
+	if (!key->is_double()) {
 		throw InterpreterException(e.name, "List indices must be of type double.");
 	}
-	const double& index = key.as_double();
+	const double& index = key->as_double();
 
-	if (object.is_list()) {
-		const List& list = object.as_list();
+	if (object->is_list()) {
+		const List& list = object->as_list();
 		if (index < 0 || index >= list.size()) {
 			throw InterpreterException(e.name, "List index out of bounds. The index " + std::to_string(index) + " is outside the valid range of 0 to " + std::to_string(list.size() - 1) + ".");
 		}
-		m_result = *list.at(static_cast<size_t>(index)).get();
+		m_result = list.at(static_cast<size_t>(index));
 		return;
-	} else if (object.is_string()) {
-		const std::string& str = object.as_string();
+	} else if (object->is_string()) {
+		const std::string& str = object->as_string();
 		if (index < 0 || index >= str.size()) {
 			throw InterpreterException(e.name, "String index out of bounds. The index " + std::to_string(index) + " is outside the valid range of 0 to " + std::to_string(str.size() - 1) + ".");
 		}
-		m_result = Object{str.substr(static_cast<size_t>(index),1)};
+		m_result = CreateRef<Object>(str.substr(static_cast<size_t>(index),1));
 		return;
 	}
 
@@ -176,35 +179,35 @@ void Interpreter::visit(const ArrayInitializerExpression& e) {
 	for (const auto& element : e.elements) {
 		list.push_back(CreateRef<Object>(evaluate(element)));
 	}
-	m_result = Object{list};
+	m_result = CreateRef<Object>(list);
 }
 
 void Interpreter::visit(const SetSubscriptExpression& e) {
-	Object object = evaluate(e.object);
-	Object index = evaluate(e.index);
-	Object value = evaluate(e.value);
+	Ref<Object> object = evaluate(e.object);
+	Ref<Object> index = evaluate(e.index);
+	Ref<Object> value = evaluate(e.value);
 
-	if (!index.is_double()) {
+	if (!index->is_double()) {
 		throw InterpreterException(e.name, "List indices must be of type double.");
 	}
-	if (index.as_double() < 0) {
-		throw InterpreterException(e.name, "List index '"+std::to_string(index.as_double())+"' is out of bounds.");
+	if (index->as_double() < 0) {
+		throw InterpreterException(e.name, "List index '"+std::to_string(index->as_double())+"' is out of bounds.");
 	}
-	const size_t idx = static_cast<size_t>(index.as_double());
+	const size_t idx = static_cast<size_t>(index->as_double());
 
-	if (object.is_list()) {
-		if (idx >= object.as_list().size()) {
-			throw InterpreterException(e.name, "String index out of bounds. The index " + std::to_string(idx) + " is outside the valid range of 0 to " + std::to_string(object.as_list().size() - 1) + ".");
+	if (object->is_list()) {
+		if (idx >= object->as_list().size()) {
+			throw InterpreterException(e.name, "String index out of bounds. The index " + std::to_string(idx) + " is outside the valid range of 0 to " + std::to_string(object->as_list().size() - 1) + ".");
 		}
-		object.as_list().at(idx)->value = value.value;
+		object->as_list().at(idx)->value = value->value;
 		m_result = object;
 		return;
 	}
 
-	if (object.is_string()) {
-		std::string str = value.to_string();
+	if (object->is_string()) {
+		std::string str = value->to_string();
 		if (str.size() > 0) {
-			object.as_string().at(idx) = str.at(0);
+			object->as_string().at(idx) = str.at(0);
 			m_result = object;
 			return;
 		}
@@ -216,11 +219,11 @@ void Interpreter::visit(const SetSubscriptExpression& e) {
 
 void Interpreter::visit(const FunctionStatement& s) {
 	Ref<MinikFunction> function = CreateRef<MinikFunction>(s, m_environment);
-	m_environment->define(s.name, Object{function});
+	m_environment->define(s.name, CreateRef<Object>(function));
 }
 
 void Interpreter::visit(const ReturnStatement& s) {
-	Object value;
+	Ref<Object> value;
 	if (s.value) {
 		value = evaluate(s.value);
 	}
@@ -228,7 +231,8 @@ void Interpreter::visit(const ReturnStatement& s) {
 }
 
 void Interpreter::visit(const ClassStatement& s) {
- 	m_environment->define(s.name, {});
+	Ref<Object> result = CreateRef<Object>(nullptr);
+ 	m_environment->define(s.name, result);
 
 	MethodsMap methods(s.methods.size());
 	for (const Ref<FunctionStatement>& method : s.methods) {
@@ -241,47 +245,37 @@ void Interpreter::visit(const ClassStatement& s) {
 		members[member->name.lexeme] = member;
 	}
 
- 	m_environment->get(s.name).value = CreateRef<MinikClass>(s.name.lexeme, methods, members);
+	result->value = CreateRef<MinikClass>(s.name.lexeme, methods, members);
 }
 
 void Interpreter::visit(const UnaryExpression& e) {
-	Object right = evaluate(e.right);
+	Ref<Object> right = evaluate(e.right);
 
 	switch (e.operator_token.type) {
 		case BANG:
-			m_result.value = !is_truthy(e.operator_token, right);
+			m_result = CreateRef<Object>(!is_truthy(e.operator_token, right));
 			return;
 		case MINUS:
-			if (right.is_double()) {
-				m_result.value = -right.as_double();
+			if (right->is_double()) {
+				m_result = CreateRef<Object>(-right->as_double());
 				return;
 			}
-			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
+			throw InterpreterException(e.operator_token, *right.get(), "Invalid argument type to unary expression.");
 		case PLUS_PLUS: {
-			if (right.is_double()) {
-				if (auto var = dynamic_cast<const VariableExpression*>(e.right.get())) {
-					Object& value = m_environment->get(var->name);
-					value = Object{right.as_double()+1};
-					m_result = value;
-					return;
-				}
+			if (right->is_double()) {
+				right->as_double()++;
+				m_result = right;
 				return;
 			}
-			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
+			throw InterpreterException(e.operator_token, *right.get(), "Invalid argument type to unary expression.");
 		}
 		case MINUS_MINUS: {
-			if (right.is_double()) {
-				auto var = dynamic_cast<const VariableExpression*>(e.right.get());
-				if (var) {
-					const Token& varName = var->name;
-					Object& value = m_environment->get(varName);
-					value = Object{right.as_double()-1};
-					m_result = value;
-					return;
-				}
+			if (right->is_double()) {
+				right->as_double()--;
+				m_result = right;
 				return;
 			}
-			throw InterpreterException(e.operator_token, right, "Invalid argument type to unary expression.");
+			throw InterpreterException(e.operator_token, *right.get(), "Invalid argument type to unary expression.");
 		}
 		default:
 			MN_ERROR("Unreachable. Interpreter visit unary");
@@ -290,13 +284,13 @@ void Interpreter::visit(const UnaryExpression& e) {
 }
 
 void Interpreter::visit(const BinaryExpression& e) {
-	Object left = evaluate(e.left);
-	Object right = evaluate(e.right);
+	Ref<Object> left = evaluate(e.left);
+	Ref<Object> right = evaluate(e.right);
 
 
 	// string concatenation
-	if (e.operator_token.type == PLUS && left.is_string() && right.is_string()) {
-		m_result.value = left.as_string() + right.as_string();
+	if (e.operator_token.type == PLUS && left->is_string() && right->is_string()) {
+		m_result = CreateRef<Object>(left->as_string() + right->as_string());
 		return;
 	}
 
@@ -304,10 +298,10 @@ void Interpreter::visit(const BinaryExpression& e) {
 	// is equals
 	switch (e.operator_token.type) {
 		case EQUAL_EQUAL:
-			m_result.value = is_equal(e.operator_token, left, right);
+			m_result = CreateRef<Object>(is_equal(e.operator_token, left, right));
 			return;
 		case BANG_EQUAL:
-			m_result.value = !is_equal(e.operator_token, left, right);
+			m_result = CreateRef<Object>(!is_equal(e.operator_token, left, right));
 			return;
 		default:
 			break;
@@ -315,85 +309,85 @@ void Interpreter::visit(const BinaryExpression& e) {
 
 
 	// doubles
-	if (!left.is_double()) {
+	if (!left->is_double()) {
 		throw InterpreterException(e.operator_token, left, "Invalid operand to binary expression.");
 	}
-	if (!right.is_double()) {
+	if (!right->is_double()) {
 		throw InterpreterException(e.operator_token, right, "Invalid operand to binary expression.");
 	}
-	double l = left.as_double();
-	double r = right.as_double();
+	double l = left->as_double();
+	double r = right->as_double();
 
 	switch (e.operator_token.type) {
 		case PLUS:
-			m_result.value = l + r;
+			m_result = CreateRef<Object>(l + r);
 			return;
 		case MINUS:
-			m_result.value = l - r;
+			m_result = CreateRef<Object>(l - r);
 			return;
 		case STAR:
-			m_result.value = l * r;
+			m_result = CreateRef<Object>(l * r);
 			return;
 		case MOD:
-			m_result.value = double(int(l) % int(r));
+			m_result = CreateRef<Object>(double(int(l) % int(r)));
 			return;
 		case SLASH:
-			m_result.value = l / r;
+			m_result = CreateRef<Object>(l / r);
 			return;
 		case GREATER:
-			m_result.value = l > r;
+			m_result = CreateRef<Object>(l > r);
 			return;
 		case GREATER_EQUAL:
-			m_result.value = l >= r;
+			m_result = CreateRef<Object>(l >= r);
 			return;
 		case LESS:
-			m_result.value = l < r;
+			m_result = CreateRef<Object>(l < r);
 			return;
 		case LESS_EQUAL:
-			m_result.value = l <= r;
+			m_result = CreateRef<Object>(l <= r);
 			return;
 		default:
 			return;
 	}
 }
 
-Object Interpreter::evaluate(const Ref<Expression>& expression) {
+Ref<Object> Interpreter::evaluate(const Ref<Expression>& expression) {
 	expression->accept(*this);
 	return m_result;
 }
 
-bool Interpreter::is_truthy(const Token& token, const Object& object) const {
-	if (object.is_nil()) {
+bool Interpreter::is_truthy(const Token& token, const Ref<Object>& object) const {
+	if (object->is_nil()) {
 		return false;
 	}
-	if (object.is_bool()) {
-		return object.as_bool();
+	if (object->is_bool()) {
+		return object->as_bool();
 	}
-	if (object.is_double()) {
-		return object.as_double() != 0.0;
+	if (object->is_double()) {
+		return object->as_double() != 0.0;
 	}
 
 	throw InterpreterException(token, object, "No viable conversion to bool.");
 }
-bool Interpreter::is_truthy(const Object& object) const {
-	if (object.is_nil()) {
+bool Interpreter::is_truthy(const Ref<Object>& object) const {
+	if (object->is_nil()) {
 		return false;
 	}
-	if (object.is_bool()) {
-		return object.as_bool();
+	if (object->is_bool()) {
+		return object->as_bool();
 	}
-	if (object.is_double()) {
-		return object.as_double() != 0.0;
+	if (object->is_double()) {
+		return object->as_double() != 0.0;
 	}
 	// TODO: throw exception ?
 	return false;
 }
 
-bool Interpreter::is_equal(const Token& token, const Object& a, const Object& b) const {
-	if (a.is_string() != b.is_string()) {
-		throw InterpreterException(token, a.is_string() ? a : b, "Cannot compare a string with a non-string type.");
+bool Interpreter::is_equal(const Token& token, const Ref<Object>& a, const Ref<Object>& b) const {
+	if (a->is_string() != b->is_string()) {
+		throw InterpreterException(token, a->is_string() ? a : b, "Cannot compare a string with a non-string type.");
 	}
-	return a.equals(b);
+	return a->equals(b);
 }
 
 void Interpreter::visit(const ExpressionStatement& s) {
@@ -401,12 +395,12 @@ void Interpreter::visit(const ExpressionStatement& s) {
 }
 
 void Interpreter::visit(const PrintStatement& s) {
-	Object value = evaluate(s.expression);
-	MN_PRINT(value.to_string().c_str());
+	Ref<Object> value = evaluate(s.expression);
+	MN_PRINT(value->to_string().c_str());
 }
 
 void Interpreter::visit(const VariableStatement& s) {
-	Object value;
+	Ref<Object> value;
 	if (s.initializer) {
 		value = evaluate(s.initializer);
 	}

@@ -19,7 +19,7 @@ private:
 	bool is_at_end() const;
 	char advance();
 	void add_token(TokenType type);
-	void add_token(TokenType type, Literal literal);
+	void add_token(TokenType type, Object literal);
 
 	void scan_token();
 
