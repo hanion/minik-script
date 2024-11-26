@@ -179,6 +179,9 @@ case "$config" in
 esac
 
 
+if [ ! -d "./build" ]; then
+	configure_first=true
+fi
 
 
 if [[ "$clean_build" == true ]]; then
