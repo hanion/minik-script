@@ -43,6 +43,7 @@ struct VariableStatement : public Statement {
 
 struct BlockStatement : public Statement {
 	std::vector<Ref<Statement>> statements;
+	std::vector<Ref<Statement>> deferred_statements = {};
 
 	BlockStatement(const std::vector<Ref<Statement>>& statements)
 		: statements(statements) {}
@@ -125,6 +126,17 @@ struct ClassStatement : public Statement {
 
 	ClassStatement(const Token& name, const std::vector<Ref<FunctionStatement>>& methods, const std::vector<Ref<VariableStatement>>& members)
 		: name(name), methods(methods), members(members) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct DeferStatement : public Statement {
+	Token token;
+	Ref<Statement> statement;
+	BlockStatement* enclosing_block;
+
+	DeferStatement(const Token& token, const Ref<Statement>& statement, BlockStatement* enclosing_block)
+		: token(token), statement(statement), enclosing_block(enclosing_block) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };

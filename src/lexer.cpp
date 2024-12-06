@@ -12,6 +12,7 @@ const std::map<std::string, TokenType> Lexer::keywords = {
 	{"class",  CLASS},
 	{"continue", CONTINUE},
 	{"else",   ELSE},
+	{"defer",  DEFER},
 	{"false",  FALSE},
 	{"for",    FOR},
 	{"fun",    FUN},

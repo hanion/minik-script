@@ -31,6 +31,9 @@ void Resolver::resolve_function(const FunctionStatement& s, FunctionType type) {
 	FunctionType enclosing_function = m_current_function;
 	m_current_function = type;
 
+	BlockStatement* enclosing_block = m_current_block;
+	m_current_block = s.body.get();
+	
 	begin_scope();
 	for (const Token& param : s.params) {
 		declare(param);
@@ -39,6 +42,7 @@ void Resolver::resolve_function(const FunctionStatement& s, FunctionType type) {
 	resolve_block(s.body->statements);
 	end_scope();
 
+	m_current_block = enclosing_block;
 	m_current_function = enclosing_function;
 }
 
@@ -74,9 +78,14 @@ void Resolver::define(const std::string& name) {
 
 
 void Resolver::visit(const BlockStatement& s) {
+	BlockStatement* enclosing_block = m_current_block;
+	m_current_block = const_cast<BlockStatement*>(&s);
+
 	begin_scope();
 	resolve_block(s.statements);
 	end_scope();
+
+	m_current_block = enclosing_block;
 }
 
 
@@ -172,6 +181,15 @@ void Resolver::visit(const ClassStatement& s) {
 	end_scope();
 
 	m_current_class = enclosing_class;
+}
+
+void Resolver::visit(const DeferStatement& s) {
+	if (m_current_block == nullptr) {
+		report_error(s.token.line, "'defer' can only be used inside a block.");
+		return;
+	}
+	const_cast<DeferStatement*>(&s)->enclosing_block = m_current_block;
+	resolve(s.statement);
 }
 
 

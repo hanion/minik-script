@@ -43,6 +43,7 @@ public:
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
+	virtual void visit(const DeferStatement& s)      override;
 
 	void resolve_block(const std::vector<Ref<Statement>>& statements);
 private:
@@ -67,6 +68,8 @@ private:
 	FunctionType m_current_function = FunctionType::NONE;
 	LoopType m_current_loop = LoopType::NONE;
 	ClassType m_current_class = ClassType::NONE;
+
+	BlockStatement* m_current_block = nullptr;
 
 };
 

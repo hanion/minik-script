@@ -1,0 +1,60 @@
+// defer.mn
+
+print("basic defer execution");
+{
+	var := "";
+	{
+		defer var = "deferred";
+		var = "should not print this";
+	}
+	print var;
+}
+
+print("multiple defers execute in reverse order");
+{
+	defer print("1");
+	defer print("2");
+	defer print("3");
+}
+
+print("nested defer statements");
+{
+	defer print("outer 1");
+	{
+		defer print("inner 1");
+		defer print("inner 2");
+	}
+	defer print("outer 2");
+}
+
+print("defer in loops");
+for i := 0; i < 3; ++i {
+	defer {
+		print("deferred in loop");
+		print(i);
+	}
+	print("loop iteration");
+	print(i);
+}
+
+print("defer in loops with break");
+for i := 0; i < 3; ++i {
+	defer {
+		print("deferred in loop");
+		print(i);
+	}
+	if i == 1 {
+		break;
+	}
+}
+
+print("defer in loops with continue");
+for i := 0; i < 3; ++i {
+	defer {
+		print("deferred in loop");
+		print(i);
+	}
+	if i == 1 {
+		continue;
+	}
+}

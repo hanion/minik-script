@@ -316,6 +316,9 @@ Ref<Statement> Parser::statement() {
 	if (match(LEFT_BRACE)) {
 		return block_statement();
 	}
+	if (match(DEFER)) {
+		return defer_statement();
+	}
 
 	return expression_statement();
 }
@@ -512,6 +515,14 @@ Ref<Statement> Parser::class_declaration(const Token& identifier) {
 
 	consume(RIGHT_BRACE, "Expected '}' after class body.");
 	return CreateRef<ClassStatement>(identifier, methods, members);
+}
+
+
+Ref<Statement> Parser::defer_statement() {
+	const Token& token = previous();
+	Ref<Statement> s = statement();
+
+	return CreateRef<DeferStatement>(token, s, nullptr);
 }
 
 }

@@ -409,14 +409,14 @@ void Interpreter::visit(const VariableStatement& s) {
 }
 
 void Interpreter::visit(const BlockStatement& s) {
-	execute_block(s.statements, CreateRef<Environment>(m_environment));
+	execute_block(s.statements, CreateRef<Environment>(m_environment), s.deferred_statements);
 }
 
 void Interpreter::visit(const IfStatement& s) {
 	if (is_truthy(evaluate(s.condition))) {
-		execute_block(s.then_branch->statements, CreateRef<Environment>(m_environment));
+		execute_block(s.then_branch->statements, CreateRef<Environment>(m_environment), s.then_branch->deferred_statements);
 	} else if (s.else_branch) {
-		execute_block(s.else_branch->statements, CreateRef<Environment>(m_environment));
+		execute_block(s.else_branch->statements, CreateRef<Environment>(m_environment), s.else_branch->deferred_statements);
 	}
 }
 
@@ -432,13 +432,15 @@ void Interpreter::visit(const ForStatement& s) {
 			}
 			while (is_truthy(evaluate(s.condition))) {
 				try {
-					execute_block(s.body->statements, CreateRef<Environment>(m_environment));
+					execute_block(s.body->statements, CreateRef<Environment>(m_environment), s.body->deferred_statements);
 				} catch (ContinueException) {
 					// handles continue by ending execution of the block, jumping to the increment
 				}
 				if (s.increment) {
 					evaluate(s.increment);
 				}
+				// clear deferred statements before next iteration
+				s.body->deferred_statements.clear();
 			}
 		} catch (BreakException) {
 			// handles break by stopping execution of the loop
@@ -462,7 +464,7 @@ void Interpreter::execute(const Ref<Statement>& statement) {
 	statement->accept(*this);
 }
 
-void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment) {
+void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment, const std::vector<Ref<Statement>>& deferred_statements) {
 	const Ref<Environment> previous = m_environment;
 	try {
 		m_environment = environment;
@@ -470,10 +472,26 @@ void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, c
 			execute(statement);
 		}
 	} catch (...) {
+		//exit block
+		if (deferred_statements.size() > 0) {
+			for (auto it = deferred_statements.rbegin(); it != deferred_statements.rend(); ++it) {
+				execute(*it);
+			}
+		}
 		m_environment = previous;
 		throw;
 	}
+	//exit block
+	if (deferred_statements.size() > 0) {
+		for (auto it = deferred_statements.rbegin(); it != deferred_statements.rend(); ++it) {
+			execute(*it);
+		}
+	}
 	m_environment = previous;
+}
+
+void Interpreter::visit(const DeferStatement& s) {
+	s.enclosing_block->deferred_statements.push_back(s.statement);
 }
 
 

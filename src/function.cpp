@@ -17,7 +17,7 @@ Ref<Object> MinikFunction::call(Interpreter& interpreter, const std::vector<Ref<
 	}
 
 	try {
-		interpreter.execute_block(m_declaration.body->statements, env);
+		interpreter.execute_block(m_declaration.body->statements, env, m_declaration.body->deferred_statements);
 	} catch (ReturnException e) {
 		if (m_is_initializer) {
 			return m_closure->get_at(0,THIS_TOKEN);

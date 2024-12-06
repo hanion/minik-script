@@ -42,6 +42,7 @@ public:
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
+	virtual void visit(const DeferStatement& s)      override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 
@@ -55,7 +56,7 @@ private:
 	bool is_truthy(const Token& token, const Ref<Object>& object) const;
 	bool is_truthy(const Ref<Object>& object) const;
 	void execute(const Ref<Statement>& statement);
-	void execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment);
+	void execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment, const std::vector<Ref<Statement>>& deferred_statements = {});
 
 
 private:
