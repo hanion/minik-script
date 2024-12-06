@@ -3,43 +3,43 @@ a :: 3.14;
 b := a * 2.7;
 str := "mystring";
 
-print a; // 3.14
-print b; // 8.478
-print str + " test"; // mystring test
-print str; // mystring
+print(a); // 3.14
+print(b); // 8.478
+print(str + " test"); // mystring test
+print(str); // mystring
 
 
 // assignment
 a = 1;
 b = 2;
 str = "newstr";
-print a; // 1
-print b; // 2
-print str; // newstr
+print(a); // 1
+print(b); // 2
+print(str); // newstr
 
 // arithmetic
-print 2 + 3 * 6;   // 20
-print (2 + 3) * 6; // 30
+print(2 + 3 * 6);   // 20
+print((2 + 3) * 6); // 30
 
-print 6 / 3 * 2;   // 4
-print 6 / (3 * 2); // 1
+print(6 / 3 * 2);   // 4
+print(6 / (3 * 2)); // 1
 
 {
 	i := 0;
 	++i;
-	print i == 1;   // true
-	print ++i == 2; // true
-	print i == 2;   // true
+	print(i == 1);   // true
+	print(++i == 2); // true
+	print(i == 2);   // true
 }
 {
 	i := 0;
 	--i;
-	print i == -1;   // true
-	print --i == -2; // true
-	print i == -2;   // true
+	print(i == -1);   // true
+	print(--i == -2); // true
+	print(i == -2);   // true
 }
 
 // redefinition
-print "should give redefinition error ->";
+print("should give redefinition error ->");
 a := 2;
-print a;
+print(a);

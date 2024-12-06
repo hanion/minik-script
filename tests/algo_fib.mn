@@ -9,7 +9,7 @@ fib :: (n) {
 
 first_fibs :: (x) {
 	for i := 0; i < x; ++i {
-		print fib(i);
+		print(fib(i));
 	}
 }
 

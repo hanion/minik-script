@@ -2,13 +2,13 @@
 global := 1.1;
 
 {
-	print global; // 1.1
+	print(global); // 1.1
 	global = 2.2;
-	print global; // 2.2
+	print(global); // 2.2
 	local := 3;
-	print local; // 3
+	print(local); // 3
 }
 
-print global; // 2.2
-print "should give undefined variable error ->";
-print local;
+print(global); // 2.2
+print("should give undefined variable error ->");
+print(local);

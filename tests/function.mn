@@ -12,7 +12,7 @@ primes_till :: (x) {
 		}
 
 		if is_prime {
-			print num;
+			print(num);
 		}
 	}
 }
@@ -21,7 +21,7 @@ start_time := clock();
 primes_till(100);
 end_time := clock();
 duration := end_time - start_time;
-print (duration > 0) and (duration < 100); // true
+print((duration > 0) and (duration < 100)); // true
 
-print "should give undefined variable error ->";
-print x;
+print("should give undefined variable error ->");
+print(x);

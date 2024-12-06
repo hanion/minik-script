@@ -7,7 +7,7 @@ print("basic defer execution");
 		defer var = "deferred";
 		var = "should not print this";
 	}
-	print var;
+	print(var);
 }
 
 print("multiple defers execute in reverse order");
@@ -30,18 +30,15 @@ print("nested defer statements");
 print("defer in loops");
 for i := 0; i < 3; ++i {
 	defer {
-		print("deferred in loop");
-		print(i);
+		print("deferred in loop", i);
 	}
-	print("loop iteration");
-	print(i);
+	print("loop iteration", i);
 }
 
 print("defer in loops with break");
 for i := 0; i < 3; ++i {
 	defer {
-		print("deferred in loop");
-		print(i);
+		print("deferred in loop", i);
 	}
 	if i == 1 {
 		break;
@@ -51,8 +48,7 @@ for i := 0; i < 3; ++i {
 print("defer in loops with continue");
 for i := 0; i < 3; ++i {
 	defer {
-		print("deferred in loop");
-		print(i);
+		print("deferred in loop", i);
 	}
 	if i == 1 {
 		continue;

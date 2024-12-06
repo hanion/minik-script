@@ -8,15 +8,15 @@ Animal :: class {
 	}
 
 	print_name :: () {
-		print this.name;
+		print(this.name);
 	}
 }
 
-print Animal;
+print(Animal);
 dog := Animal("doug");
-print dog;
-print dog.name;
-print dog.print_name;
+print(dog);
+print(dog.name);
+print(dog.print_name);
 dog.print_name();
 dog.name = "dawg";
 dog.print_name();

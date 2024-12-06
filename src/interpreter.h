@@ -32,7 +32,6 @@ public:
 	virtual void visit(const SetSubscriptExpression& e) override;
 
 	virtual void visit(const ExpressionStatement& s) override;
-	virtual void visit(const PrintStatement& s)      override;
 	virtual void visit(const VariableStatement& s)   override;
 	virtual void visit(const BlockStatement& s)      override;
 	virtual void visit(const IfStatement& s)         override;

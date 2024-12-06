@@ -46,4 +46,27 @@ Ref<Object> mcAssert::call(Interpreter& interpreter, const Arguments& arguments)
 	return CreateRef<Object>(true);
 }
 
+Ref<Object> mcToString::call(Interpreter& interpreter, const Arguments& arguments) {
+	return CreateRef<Object>(arguments[0]->to_string());
+}
+
+Ref<Object> mcPrint::call(Interpreter& interpreter, const Arguments& arguments) {
+	Token error_token = Token{IDENTIFIER, "print", {}, 0};
+	if (arguments.size() == 0) {
+		throw InterpreterException(error_token, error_token.lexeme + " expects at least one argument.");
+	}
+
+	std::string str;
+	for (size_t i = 0; i < arguments.size(); ++i) {
+		str += arguments[i]->to_string();
+		if (i != arguments.size()-1) {
+			str += " ";
+		}
+	}
+
+	MN_PRINT_LN("%s", str.c_str());
+
+	return CreateRef<Object>(str);
+}
+
 }

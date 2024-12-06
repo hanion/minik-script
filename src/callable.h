@@ -33,5 +33,19 @@ public:
 	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
 };
 
+class mcToString : public MinikCallable {
+public:
+	virtual int arity() override { return 1; }
+	virtual std::string to_string() const override { return "<fn native to_str>"; }
+	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
+};
+
+class mcPrint : public MinikCallable {
+public:
+	virtual int arity() override { return -1; }
+	virtual std::string to_string() const override { return "<fn native print>"; }
+	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
+};
+
 }
 

@@ -10,27 +10,16 @@ inner 1
 outer 2
 outer 1
 defer in loops
-loop iteration
-0.000000
-deferred in loop
-0.000000
-loop iteration
-1.000000
-deferred in loop
-1.000000
-loop iteration
-2.000000
-deferred in loop
-2.000000
+loop iteration 0.000000
+deferred in loop 0.000000
+loop iteration 1.000000
+deferred in loop 1.000000
+loop iteration 2.000000
+deferred in loop 2.000000
 defer in loops with break
-deferred in loop
-0.000000
-deferred in loop
-1.000000
+deferred in loop 0.000000
+deferred in loop 1.000000
 defer in loops with continue
-deferred in loop
-0.000000
-deferred in loop
-1.000000
-deferred in loop
-2.000000
+deferred in loop 0.000000
+deferred in loop 1.000000
+deferred in loop 2.000000

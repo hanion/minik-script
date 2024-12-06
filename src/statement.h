@@ -22,15 +22,6 @@ struct ExpressionStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
-struct PrintStatement : public Statement {
-	Ref<Expression> expression;
-
-	PrintStatement(const Ref<Expression>& expression)
-		: expression(expression) {}
-
-	void accept(Visitor& visitor) override { visitor.visit(*this); }
-};
-
 struct VariableStatement : public Statement {
 	Token name;
 	Ref<Expression> initializer;

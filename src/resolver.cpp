@@ -115,9 +115,6 @@ void Resolver::visit(const IfStatement& s) {
 	}
 }
 
-void Resolver::visit(const PrintStatement& s) {
-	resolve(s.expression);
-}
 void Resolver::visit(const ReturnStatement& s) {
 	if (m_current_function != FunctionType::FUNCTION) {
 		report_error(s.keyword.line, "Cannot return from outside of functions.");

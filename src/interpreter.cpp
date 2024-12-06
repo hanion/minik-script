@@ -20,6 +20,8 @@ namespace minik {
 Interpreter::Interpreter() {
 	m_globals->define(Token(IDENTIFIER, "clock", {}, 0), CreateRef<Object>( CreateRef<mcClock>() ));
 	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), CreateRef<Object>( CreateRef<mcAssert>() ));
+	m_globals->define(Token(IDENTIFIER, "to_str", {}, 0), CreateRef<Object>( CreateRef<mcToString>() ));
+	m_globals->define(Token(IDENTIFIER, "print",  {}, 0), CreateRef<Object>( CreateRef<mcPrint>() ));
 }
 
 
@@ -392,11 +394,6 @@ bool Interpreter::is_equal(const Token& token, const Ref<Object>& a, const Ref<O
 
 void Interpreter::visit(const ExpressionStatement& s) {
 	evaluate(s.expression);
-}
-
-void Interpreter::visit(const PrintStatement& s) {
-	Ref<Object> value = evaluate(s.expression);
-	MN_PRINT(value->to_string().c_str());
 }
 
 void Interpreter::visit(const VariableStatement& s) {

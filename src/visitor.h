@@ -18,7 +18,6 @@ class ArrayInitializerExpression;
 class SetSubscriptExpression;
 
 class ExpressionStatement;
-class PrintStatement;
 class VariableStatement;
 class BlockStatement;
 class IfStatement;
@@ -51,7 +50,6 @@ public:
 
 
 	virtual void visit(const ExpressionStatement& s) {}
-	virtual void visit(const PrintStatement& s) {}
 	virtual void visit(const VariableStatement& s) {}
 	virtual void visit(const BlockStatement& s) {}
 	virtual void visit(const IfStatement& s) {}

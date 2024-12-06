@@ -23,7 +23,7 @@ enum TokenType {
 	IDENTIFIER, STRING, NUMBER,
 
 	AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-	PRINT, RETURN, SUPER, THIS, TRUE, WHILE,
+	RETURN, SUPER, THIS, TRUE, WHILE,
 	BREAK, CONTINUE,
 	DEFER,
 	MEOF
@@ -72,7 +72,6 @@ const static std::string token_type_to_string(TokenType type) {
 		case IF:              return "IF";
 		case NIL:             return "NIL";
 		case OR:              return "OR";
-		case PRINT:           return "PRINT";
 		case RETURN:          return "RETURN";
 		case SUPER:           return "SUPER";
 		case THIS:            return "THIS";

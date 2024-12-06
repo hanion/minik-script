@@ -4,11 +4,11 @@
 a := 2;
 if a == 2 {
 	string := "then branch";
-	print string;
+	print(string);
 } else if a == 1 {
-	print "else if branch";
+	print("else if branch");
 } else {
-	print "else branch";
+	print("else branch");
 }
 
 
@@ -16,22 +16,22 @@ if a == 2 {
 a = a - 1;
 if a == 2 {
 	string := "then branch";
-	print string;
+	print(string);
 } else if a == 1 {
-	print "else if branch";
+	print("else if branch");
 } else {
-	print "else branch";
+	print("else branch");
 }
 
 // else branch
 a = a - 1;
 if a == 2 {
 	string := "then branch";
-	print string;
+	print(string);
 } else if a == 1 {
-	print "else if branch";
+	print("else if branch");
 } else {
-	print "else branch";
+	print("else branch");
 }
 
 
@@ -40,8 +40,8 @@ b :: false;
 if b {
 	local_string := "local";
 } else {
-	print "should give undefined variable error ->";
-	print local_string;
+	print("should give undefined variable error ->");
+	print(local_string);
 }
 
 

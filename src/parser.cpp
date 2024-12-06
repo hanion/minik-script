@@ -277,7 +277,6 @@ void Parser::synchronize() {
 			case FOR:
 			case IF:
 			case WHILE:
-			case PRINT:
 			case RETURN:
 			return;
 			default:
@@ -307,9 +306,6 @@ Ref<Statement> Parser::statement() {
 	if (match(IF)) {
 		return if_statement();
 	}
-	if (match(PRINT)) {
-		return print_statement();
-	}
 	if (match(WHILE)) {
 		return while_statement();
 	}
@@ -321,12 +317,6 @@ Ref<Statement> Parser::statement() {
 	}
 
 	return expression_statement();
-}
-
-Ref<Statement> Parser::print_statement() {
-	Ref<Expression> value = expression();
-	consume(SEMICOLON, "Expected ';' after value.");
-	return CreateRef<PrintStatement>(value);
 }
 
 Ref<Statement> Parser::expression_statement() {

@@ -44,7 +44,6 @@ private:
 	void synchronize();
 
 	Ref<Statement> statement();
-	Ref<Statement> print_statement();
 	Ref<Statement> expression_statement();
 	Ref<Statement> declaration();
 	Ref<Statement> typed_declaration();
