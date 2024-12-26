@@ -2,12 +2,11 @@
 
 print_usage() {
 	echo
-	echo "Usage: $0 [--clean] [--build] [--run-tests] [config] [target]"
-	echo "    --clean: Clean build"
-	echo "    --build: Perform the build only, without running the executable"
-	echo "    --run-tests: Run tests"
+	echo "Usage: $0 [clean] [build] [test] [config]"
+	echo "    clean: Clean build"
+	echo "    build: Perform the build only, without running the executable"
+	echo "    test: Run tests"
 	echo "    config: debug  | release | min"
-	echo "    target: minik-script"
 }
 
 clean_build() {
@@ -90,21 +89,9 @@ print_colored() {
 	fi
 }
 
-print_success() {
-	local message=$1
-	print_colored "32" "$message"
-}
-
-print_error() {
-	local message=$1
-	print_colored "91" "$message"
-}
-
-print_job() {
-	local message=$1
-	print_colored "96" "$message"
-}
-
+print_success() { print_colored "32" "$1"; }
+print_error() { print_colored "91" "$1"; }
+print_job() { print_colored "96" "$1"; }
 
 
 
@@ -121,25 +108,21 @@ while [[ $# -gt 0 ]]; do
 	key="$1"
 
 	case $key in
-		--clean)
+		clean)
 			clean_build=true
 			shift
 			;;
-		--build)
+		build)
 			build_only=true
 			shift
 			;;
-		--run-tests)
+		test)
 			run_tests=true
 			shift
 			;;
 		debug|release|min)
 			config="$1"
 			configure_first=true
-			shift
-			;;
-		minik-script)
-			target="$1"
 			shift
 			;;
 		*)
