@@ -1,0 +1,58 @@
+// use_before_define.mn
+
+print(printer);
+printer("hello world");
+
+print(Animal);
+anim := Animal("fish");
+anim.print_name();
+
+
+Animal :: class {
+	name: string;
+
+	Animal :: (name) {
+		this.name = name;
+	}
+
+	print_name :: () {
+		printer(this.name);
+	}
+}
+
+printer :: (msg) {
+	print(msg);
+}
+
+
+print(mod( 17,  5) == ( 17 %  5) );
+print(mod(-17,  5) == (-17 %  5) );
+print(mod( 17, -5) == ( 17 % -5) );
+print(mod(-17, -5) == (-17 % -5) );
+print(mod(  0,  5) == (  0 %  5) );
+print(mod( 17, 17) == ( 17 % 17) );
+print(mod( 17,  1) == ( 17 %  1) );
+
+
+mod :: (a, b) {
+	if a < 0 {
+		return remainder(abs(a), abs(b)) * -1;
+	} else {
+		return remainder(abs(a), abs(b));
+	}
+}
+
+remainder :: (a, b) {
+	while a >= b {
+		a = a - b;
+	}
+	return a;
+}
+
+abs :: (x) {
+	if x < 0 {
+		return -x;
+	}
+	return x;
+}
+

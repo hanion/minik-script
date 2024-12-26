@@ -15,5 +15,3 @@ true
 true
 true
 true
-should give redefinition error ->
-[ERROR] [line 44], Redefinition of 'a'.

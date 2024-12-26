@@ -54,6 +54,9 @@ struct BreakException {
 struct ContinueException {
 	const Token label;
 };
+struct GotoException {
+	const Token label;
+};
 struct AssertException {};
 
 struct ReturnException {

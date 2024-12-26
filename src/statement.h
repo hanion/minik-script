@@ -143,5 +143,13 @@ struct LabelStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct GotoStatement : public Statement {
+	Token label;
+
+	GotoStatement(const Token& token) : label(token) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 
 }

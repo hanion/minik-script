@@ -15,17 +15,25 @@ public:
 	Environment() : enclosing(nullptr) {}
 	Environment(const Ref<Environment>& enclosing) : enclosing(enclosing) {}
 
+	void predefine(const Token& name, const Ref<Object>& value) {
+		values.emplace(name.lexeme, Symbol{false, value});
+	}
 	void define(const Token& name, const Ref<Object>& value) {
 		if (values.count(name.lexeme) > 0) {
-			throw InterpreterException(name, "Redefinition of '" + name.lexeme + "'.");
+			if (values.at(name.lexeme).defined) {
+				throw InterpreterException(name, "Redefinition of '" + name.lexeme + "'.");
+			} else {
+				values.at(name.lexeme).defined = true;
+				return;
+			}
 		}
-		values.emplace(name.lexeme, value);
+		values.emplace(name.lexeme, Symbol{true, value});
 	}
 
 	Ref<Object> get(const Token& name) {
 		auto it = values.find(name.lexeme);
 		if (it != values.end()) {
-			return it->second;
+			return it->second.object;
 		}
 	
 		if (enclosing) {
@@ -40,7 +48,7 @@ public:
 
 		auto it = env.values.find(name.lexeme);
 		if (it != env.values.end()) {
-			return it->second;
+			return it->second.object;
 		}
 
 		// UNREACHABLE
@@ -60,7 +68,11 @@ public:
 
 private:
 	Ref<Environment> enclosing;
-	std::unordered_map<std::string, Ref<Object>> values = {};
+	struct Symbol {
+		bool defined = false;
+		Ref<Object> object;
+	};
+	std::unordered_map<std::string, Symbol> values = {};
 };
 
 }

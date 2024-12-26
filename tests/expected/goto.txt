@@ -1,0 +1,29 @@
+i = 0.000000
+i = 1.000000
+i = 2.000000
+i = 3.000000
+i = 4.000000
+finished loop at: 5.000000
+jumping to mid
+middle i = 3.000000
+jumping to end
+end i = 7.000000
+inner loop: 0.000000
+inner loop: 1.000000
+inner loop: 2.000000
+breaking out of inner loop
+outer loop: 0.000000
+breaking out of inner loop
+outer loop: 1.000000
+breaking out of inner loop
+outer loop: 2.000000
+breaking out of inner loop
+outer loop: 3.000000
+breaking out of inner loop
+outer loop: 4.000000
+i =  0.000000
+i =  1.000000
+i =  2.000000
+i =  3.000000
+i =  4.000000
+exiting infinite loop at i =  5.000000

@@ -1,0 +1,102 @@
+// goto.mn
+
+// basic for loop with goto
+{
+	i := 0;
+	label loop;
+	if i < 5 {
+		print("i =", i);
+		++i;
+		goto loop;
+	}
+}
+
+// basic goto usage within a loop
+{
+	i := 0;
+	for ; i < 10; ++i {
+		if i == 5 {
+			goto end;
+		}
+	}
+
+	label end;
+	print("finished loop at:", i);
+}
+
+// multiple goto statements and labels
+{
+	i := 0;
+	label loop_start;
+	for ; i < 10; ++i {
+		if i == 3 {
+			print("jumping to mid");
+			goto mid;
+		}
+		if i == 7 {
+			print("jumping to end");
+			goto end;
+		}
+	}
+
+	label mid;
+	print("middle i =", i);
+	if i == 3 {
+		++i;
+		goto loop_start;
+	}
+
+	label end;
+	print("end i =", i);
+}
+
+// using goto to break out of nested loops
+{
+	outer := 0;
+	inner := 0;
+
+	label outer_loop_start;
+	for ; outer < 5; ++outer {
+
+		label inner_loop_start;
+		for ; inner < 5; ++inner {
+			if inner == 3 {
+				print("breaking out of inner loop");
+				goto outer_loop_end;
+			}
+			print("inner loop:", inner);
+		}
+
+		label outer_loop_end;
+		print("outer loop:", outer);
+	}
+}
+
+
+// goto skipping over code
+{
+	x := 0;
+	label skip;
+
+	if x == 0 {
+		goto end;
+		print("this should be skipped.");
+	}
+
+	label end;
+}
+
+// goto with an infinite loop and proper exit
+{
+	for i := 0; true; ++i {
+		if i == 5 {
+			print("exiting infinite loop at i = ", i);
+			goto end;
+		}
+		print("i = ", i);
+	}
+	label end;
+}
+
+
+

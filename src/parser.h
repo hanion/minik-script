@@ -58,6 +58,7 @@ private:
 	Ref<Statement> class_declaration(const Token& identifier);
 	Ref<Statement> defer_statement();
 	Ref<Statement> label_statement();
+	Ref<Statement> goto_statement();
 
 private:
 	std::vector<Token> m_tokens;

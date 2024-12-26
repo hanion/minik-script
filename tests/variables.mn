@@ -39,7 +39,3 @@ print(6 / (3 * 2)); // 1
 	print(i == -2);   // true
 }
 
-// redefinition
-print("should give redefinition error ->");
-a := 2;
-print(a);

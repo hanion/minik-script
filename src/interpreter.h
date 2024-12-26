@@ -43,6 +43,7 @@ public:
 	virtual void visit(const ClassStatement& s)      override;
 	virtual void visit(const DeferStatement& s)      override;
 	virtual void visit(const LabelStatement& s)      override;
+	virtual void visit(const GotoStatement& s)       override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 
@@ -58,6 +59,7 @@ private:
 	void execute(const Ref<Statement>& statement);
 	void execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment, const std::vector<Ref<Statement>>& deferred_statements = {});
 
+	void collect_predefinitions(const std::vector<Ref<Statement>>& statements);
 
 private:
 	Ref<Environment> m_globals = CreateRef<Environment>();

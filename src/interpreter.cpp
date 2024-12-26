@@ -27,11 +27,10 @@ Interpreter::Interpreter() {
 
 void Interpreter::interpret(const std::vector<Ref<Statement>>& statements) {
 	try {
-		for (const Ref<Statement>& statement : statements) {
-			execute(statement);
-		}
+		execute_block(statements, m_environment);
 	} catch (BreakException) {
 	} catch (ContinueException) {
+	} catch (GotoException) {
 	} catch (InterpreterException e) {
 		report_runtime_error(e);
 	}
@@ -422,6 +421,9 @@ void Interpreter::visit(const LabelStatement& s) {
 		execute(s.loop);
 	}
 }
+void Interpreter::visit(const GotoStatement& s) {
+	throw GotoException{s.label};
+}
 void Interpreter::visit(const ForStatement& s) {
 	const Ref<Environment>& loop_environment = CreateRef<Environment>(m_environment);
 	const Ref<Environment> previous = m_environment;
@@ -478,12 +480,8 @@ void Interpreter::execute(const Ref<Statement>& statement) {
 
 void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment, const std::vector<Ref<Statement>>& deferred_statements) {
 	const Ref<Environment> previous = m_environment;
-	try {
-		m_environment = environment;
-		for (auto& statement : statements) {
-			execute(statement);
-		}
-	} catch (...) {
+	m_environment = environment;
+	const auto exit_block = [&]() {
 		//exit block
 		if (deferred_statements.size() > 0) {
 			for (auto it = deferred_statements.rbegin(); it != deferred_statements.rend(); ++it) {
@@ -491,15 +489,70 @@ void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, c
 			}
 		}
 		m_environment = previous;
+	};
+
+	collect_predefinitions(statements);
+
+	try {
+		size_t start_index = 0;
+		while (start_index < statements.size()) {
+			m_environment = environment;
+			try {
+				for (size_t i = start_index; i < statements.size(); ++i) {
+					execute(statements[i]);
+				}
+				break;
+			} catch (GotoException e) {
+				bool found_label = false;
+
+				for (size_t i = 0; i < statements.size(); ++i) {
+					if (LabelStatement* l = dynamic_cast<LabelStatement*>(statements[i].get())) {
+						if (l->name.lexeme == e.label.lexeme) {
+							start_index = i;
+							found_label = true;
+							break;
+						}
+					}
+				}
+
+				if (!found_label) {
+					// should we ?
+					exit_block();
+					throw e; // re-throw the GotoException if label not found in this block
+				}
+			}
+		}
+
+	} catch (...) {
+		exit_block();
 		throw;
 	}
-	//exit block
-	if (deferred_statements.size() > 0) {
-		for (auto it = deferred_statements.rbegin(); it != deferred_statements.rend(); ++it) {
-			execute(*it);
+	exit_block();
+}
+
+void Interpreter::collect_predefinitions(const std::vector<Ref<Statement>>& statements) {
+	for (auto& s : statements) {
+		if (FunctionStatement* statement = dynamic_cast<FunctionStatement*>(s.get())) {
+			Ref<MinikFunction> function = CreateRef<MinikFunction>(*statement, m_environment);
+			m_environment->predefine(statement->name, CreateRef<Object>(function));
+		} else if (ClassStatement* statement = dynamic_cast<ClassStatement*>(s.get())) {
+			Ref<Object> result = CreateRef<Object>(nullptr);
+
+			MethodsMap methods(statement->methods.size());
+			for (const Ref<FunctionStatement>& method : statement->methods) {
+				bool is_initializer = (method->name.lexeme == statement->name.lexeme);
+				methods[method->name.lexeme] = CreateRef<MinikFunction>(*method.get(), m_environment, is_initializer);
+			}
+
+			MembersMap members(statement->members.size());
+			for (const Ref<VariableStatement>& member : statement->members) {
+				members[member->name.lexeme] = member;
+			}
+
+			result->value = CreateRef<MinikClass>(statement->name.lexeme, methods, members);
+			m_environment->predefine(statement->name, result);
 		}
 	}
-	m_environment = previous;
 }
 
 void Interpreter::visit(const DeferStatement& s) {

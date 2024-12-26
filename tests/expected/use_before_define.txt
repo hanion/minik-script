@@ -1,0 +1,11 @@
+<fn printer>
+hello world
+<class Animal>
+fish
+true
+true
+true
+true
+true
+true
+true

@@ -209,18 +209,20 @@ void Resolver::visit(const DeferStatement& s) {
 }
 
 void Resolver::visit(const LabelStatement& s) {
-	begin_scope();
-
-	ResolverScope& scope = m_scopes.back();
-	if (scope.count(s.name.lexeme) > 0) {
-		report_error(s.name.line, "Variable with name '"+s.name.lexeme+"' already exists in this scope.");
+	if (m_scopes.size() > 0)  {
+		ResolverScope& scope = m_scopes.back();
+		if (scope.count(s.name.lexeme) > 0) {
+			report_error(s.name.line, "Variable with name '"+s.name.lexeme+"' already exists in this scope.");
+		}
+		scope[s.name.lexeme] = SymbolState::LABEL;
 	}
-	scope[s.name.lexeme] = SymbolState::LABEL;
 
 	if (s.loop) {
 		resolve(s.loop);
 	}
-	end_scope();
+}
+
+void Resolver::visit(const GotoStatement& s) {
 }
 
 

@@ -45,6 +45,7 @@ public:
 	virtual void visit(const ClassStatement& s)      override;
 	virtual void visit(const DeferStatement& s)      override;
 	virtual void visit(const LabelStatement& s)      override;
+	virtual void visit(const GotoStatement& s)       override;
 
 	void resolve_block(const std::vector<Ref<Statement>>& statements);
 private:
@@ -66,7 +67,7 @@ private:
 
 private:
 	Interpreter& m_interpreter;
-	std::vector<ResolverScope> m_scopes = {};
+	std::vector<ResolverScope> m_scopes = {{}};
 	FunctionType m_current_function = FunctionType::NONE;
 	LoopType m_current_loop = LoopType::NONE;
 	ClassType m_current_class = ClassType::NONE;

@@ -18,6 +18,7 @@ const std::map<std::string, TokenType> Lexer::keywords = {
 	{"fun",    FUN},
 	{"if",     IF},
 	{"label",  LABEL},
+	{"goto",   GOTO},
 	{"nil",    NIL},
 	{"or",     OR},
 	{"return", RETURN},

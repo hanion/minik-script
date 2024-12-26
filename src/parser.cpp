@@ -318,6 +318,9 @@ Ref<Statement> Parser::statement() {
 	if (match(LABEL)) {
 		return label_statement();
 	}
+	if (match(GOTO)) {
+		return goto_statement();
+	}
 
 	return expression_statement();
 }
@@ -554,5 +557,11 @@ Ref<Statement> Parser::label_statement() {
 	
 	return statement;
 }
+Ref<Statement> Parser::goto_statement() {
+	const Token& id = consume(IDENTIFIER, "Expected identifier after goto.");
+	consume(SEMICOLON, "Expected ';' after goto.");
+	return CreateRef<GotoStatement>(id);
+}
+
 
 }
