@@ -65,7 +65,7 @@ void Resolver::declare(const Token& name) {
 		report_error(name.line, "Variable with name '"+name.lexeme+"' already exists in this scope.");
 	}
 
-	scope[name.lexeme] = false;
+	scope[name.lexeme] = SymbolState::DECLARED;
 }
 void Resolver::define(const std::string& name) {
 	if (m_scopes.empty()) {
@@ -73,7 +73,7 @@ void Resolver::define(const std::string& name) {
 	}
 
 	ResolverScope& scope = m_scopes.back();
-	scope[name] = true;
+	scope[name] = SymbolState::DEFINED;
 }
 
 
@@ -126,14 +126,33 @@ void Resolver::visit(const ReturnStatement& s) {
 		resolve(s.value);
 	}
 }
+
+bool Resolver::label_exists(const Token& label) {
+	for (int i = m_scopes.size() - 1; i >= 0; i--) {
+		if (m_scopes[i].count(label.lexeme) > 0) {
+			return m_scopes[i].at(label.lexeme) == SymbolState::LABEL;
+		}
+	}
+	return false;
+}
 void Resolver::visit(const BreakStatement& s) {
 	if (m_current_loop != LoopType::FOR) {
-		report_error(s.keyword.line, "Cannot break from outside of loops.");
+		report_error(s.keyword.line, "Invalid 'break' statement: 'break' can only be used inside a loop.");
+	}
+	if (s.keyword.type == IDENTIFIER) {
+		if (!label_exists(s.keyword)) {
+			report_error(s.keyword.line, "Invalid 'break' label: The label '"+s.keyword.lexeme+"' does not exist in the current scope.");
+		}
 	}
 }
 void Resolver::visit(const ContinueStatement& s) {
 	if (m_current_loop != LoopType::FOR) {
-		report_error(s.keyword.line, "Cannot continue from outside of loops.");
+		report_error(s.keyword.line, "Invalid 'continue' statement: 'continue' can only be used inside a loop.");
+	}
+	if (s.keyword.type == IDENTIFIER) {
+		if (!label_exists(s.keyword)) {
+			report_error(s.keyword.line, "Invalid 'continue' label: The label '"+s.keyword.lexeme+"' does not exist in the current scope.");
+		}
 	}
 }
 
@@ -189,6 +208,20 @@ void Resolver::visit(const DeferStatement& s) {
 	resolve(s.statement);
 }
 
+void Resolver::visit(const LabelStatement& s) {
+	begin_scope();
+
+	ResolverScope& scope = m_scopes.back();
+	if (scope.count(s.name.lexeme) > 0) {
+		report_error(s.name.line, "Variable with name '"+s.name.lexeme+"' already exists in this scope.");
+	}
+	scope[s.name.lexeme] = SymbolState::LABEL;
+
+	if (s.loop) {
+		resolve(s.loop);
+	}
+	end_scope();
+}
 
 
 
@@ -196,7 +229,7 @@ void Resolver::visit(const VariableExpression& e) {
 	if (!m_scopes.empty()) {
 		auto it = m_scopes.back().find(e.name.lexeme);
 		if (it != m_scopes.back().end()) {
-			if (!it->second) {
+			if (it->second != SymbolState::DEFINED) {
 				report_error(e.name.line, "Cannot read local variable '"+e.name.lexeme+"' in its own initializer.");
 			}
 		}

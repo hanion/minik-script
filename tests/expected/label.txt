@@ -1,0 +1,16 @@
+break with label
+j
+j
+continue with label
+j
+j
+j
+break with label 2
+i 0.000000 j 0.000000
+i 0.000000 j 1.000000
+i 0.000000 j 2.000000
+i 1.000000 j 0.000000
+continue with label 2
+i 1.000000 j 0.000000
+i 1.000000 j 1.000000
+i 1.000000 j 2.000000

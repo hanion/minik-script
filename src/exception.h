@@ -48,8 +48,12 @@ void report_runtime_error(const InterpreterException& e);
 
 
 
-struct BreakException {};
-struct ContinueException {};
+struct BreakException {
+	const Token label;
+};
+struct ContinueException {
+	const Token label;
+};
 struct AssertException {};
 
 struct ReturnException {

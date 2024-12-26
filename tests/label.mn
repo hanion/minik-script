@@ -1,0 +1,48 @@
+// label.mn
+
+print("break with label");
+label outer_break_test
+for i := 0; i < 3; ++i {
+	for j := 0; j < 3; ++j {
+		if j == 2 {
+			break outer_break_test;
+		}
+		print("j");
+	}
+	print("should never print");
+}
+
+
+print("continue with label");
+label outer_continue_test
+for i := 0; i < 3; ++i {
+	for j := 0; j < 3; ++j {
+		if j >= 1 {
+			continue outer_continue_test;
+		}
+		print("j");
+	}
+	print("should never print");
+}
+
+print("break with label 2");
+label outer_break_test_2
+for i := 0; i < 3; ++i {
+	for j := 0; j < 3; ++j {
+		if i == 1 and j == 1 {
+			break outer_break_test_2;
+		}
+		print("i",i ,"j",j);
+	}
+}
+
+print("continue with label 2");
+label outer_continue_test_2
+for i := 0; i < 3; ++i {
+	for j := 0; j < 3; ++j {
+		if i % 2 == 0 {
+			continue outer_continue_test_2;
+		}
+		print("i",i ,"j",j);
+	}
+}

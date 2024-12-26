@@ -315,6 +315,9 @@ Ref<Statement> Parser::statement() {
 	if (match(DEFER)) {
 		return defer_statement();
 	}
+	if (match(LABEL)) {
+		return label_statement();
+	}
 
 	return expression_statement();
 }
@@ -444,10 +447,24 @@ Ref<Statement> Parser::for_statement() {
 }
 
 Ref<Statement> Parser::break_statement() {
+	// break with label
+	if (match(IDENTIFIER)) {
+		const Token& label = previous();
+		consume(SEMICOLON, "Expected ';' aftrer 'break' label.");
+		return CreateRef<BreakStatement>(label);
+	}
+
 	const Token& token = consume(SEMICOLON, "Expected ';' aftrer 'break'.");
 	return CreateRef<BreakStatement>(token);
 }
 Ref<Statement> Parser::continue_statement() {
+	// continue with label
+	if (match(IDENTIFIER)) {
+		const Token& label = previous();
+		consume(SEMICOLON, "Expected ';' aftrer 'continue' label.");
+		return CreateRef<ContinueStatement>(label);
+	}
+
 	const Token& token = consume(SEMICOLON, "Expected ';' aftrer 'continue'.");
 	return CreateRef<ContinueStatement>(token);
 }
@@ -513,6 +530,29 @@ Ref<Statement> Parser::defer_statement() {
 	Ref<Statement> s = statement();
 
 	return CreateRef<DeferStatement>(token, s, nullptr);
+}
+
+Ref<Statement> Parser::label_statement() {
+	const Token& id = consume(IDENTIFIER, "Expected identifier after label.");
+	Ref<LabelStatement> statement = CreateRef<LabelStatement>(id, nullptr);
+
+	if (match(FOR)) {
+		Ref<Statement> s = for_statement();
+		if (Ref<ForStatement> fs = std::dynamic_pointer_cast<ForStatement>(s)) {
+			fs->label = statement;
+			statement->loop = fs;
+		}
+	} else if (match(WHILE)) {
+		Ref<Statement> s = while_statement();
+		if (Ref<ForStatement> fs = std::dynamic_pointer_cast<ForStatement>(s)) {
+			fs->label = statement;
+			statement->loop = fs;
+		}
+	} else {
+		consume(SEMICOLON, "Expected ';' after label.");
+	}
+	
+	return statement;
 }
 
 }

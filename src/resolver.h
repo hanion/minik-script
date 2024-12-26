@@ -7,7 +7,8 @@
 
 namespace minik {
 
-using ResolverScope = std::unordered_map<std::string, bool>;
+enum class SymbolState { DECLARED, DEFINED, LABEL };
+using ResolverScope = std::unordered_map<std::string, SymbolState>;
 
 enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
 enum class LoopType { NONE, FOR };
@@ -43,6 +44,7 @@ public:
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
 	virtual void visit(const DeferStatement& s)      override;
+	virtual void visit(const LabelStatement& s)      override;
 
 	void resolve_block(const std::vector<Ref<Statement>>& statements);
 private:
@@ -51,6 +53,7 @@ private:
 	void resolve_local(const Expression& expression, const Token& token);
 	void resolve_function(const FunctionStatement& s, FunctionType type);
 
+	bool label_exists(const Token& label);
 
 	void begin_scope();
 	void end_scope();

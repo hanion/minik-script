@@ -417,6 +417,11 @@ void Interpreter::visit(const IfStatement& s) {
 	}
 }
 
+void Interpreter::visit(const LabelStatement& s) {
+	if (s.loop) {
+		execute(s.loop);
+	}
+}
 void Interpreter::visit(const ForStatement& s) {
 	const Ref<Environment>& loop_environment = CreateRef<Environment>(m_environment);
 	const Ref<Environment> previous = m_environment;
@@ -430,8 +435,13 @@ void Interpreter::visit(const ForStatement& s) {
 			while (is_truthy(evaluate(s.condition))) {
 				try {
 					execute_block(s.body->statements, CreateRef<Environment>(m_environment), s.body->deferred_statements);
-				} catch (ContinueException) {
+				} catch (ContinueException c) {
 					// handles continue by ending execution of the block, jumping to the increment
+					if (c.label.type == IDENTIFIER) {
+						if (!s.label || s.label->name.lexeme != c.label.lexeme) {
+							throw c;
+						}
+					}
 				}
 				if (s.increment) {
 					evaluate(s.increment);
@@ -439,8 +449,13 @@ void Interpreter::visit(const ForStatement& s) {
 				// clear deferred statements before next iteration
 				s.body->deferred_statements.clear();
 			}
-		} catch (BreakException) {
+		} catch (BreakException b) {
 			// handles break by stopping execution of the loop
+			if (b.label.type == IDENTIFIER) {
+				if (!s.label || s.label->name.lexeme != b.label.lexeme) {
+					throw b;
+				}
+			}
 		}
 
 	} catch (...) {
@@ -451,10 +466,10 @@ void Interpreter::visit(const ForStatement& s) {
 }
 
 void Interpreter::visit(const BreakStatement& s) {
-	throw BreakException();
+	throw BreakException{s.keyword};
 }
 void Interpreter::visit(const ContinueStatement& s) {
-	throw ContinueException();
+	throw ContinueException{s.keyword};
 }
 
 void Interpreter::execute(const Ref<Statement>& statement) {

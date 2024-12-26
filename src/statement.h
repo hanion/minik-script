@@ -60,6 +60,7 @@ struct ForStatement : public Statement {
 	Ref<Expression> condition;
 	Ref<Expression> increment;
 	Ref<BlockStatement> body;
+	Ref<LabelStatement> label = nullptr;
 
 	ForStatement(const Ref<Statement>& initializer, const Ref<Expression>& condition,
 			  const Ref<Expression>& increment, const Ref<BlockStatement>& body)
@@ -128,6 +129,16 @@ struct DeferStatement : public Statement {
 
 	DeferStatement(const Token& token, const Ref<Statement>& statement, BlockStatement* enclosing_block)
 		: token(token), statement(statement), enclosing_block(enclosing_block) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
+struct LabelStatement : public Statement {
+	Token name;
+	Ref<ForStatement> loop;
+
+	LabelStatement(const Token& token, const Ref<ForStatement>& loop)
+		: name(token), loop(loop) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };

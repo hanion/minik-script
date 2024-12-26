@@ -42,6 +42,7 @@ public:
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
 	virtual void visit(const DeferStatement& s)      override;
+	virtual void visit(const LabelStatement& s)      override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 
