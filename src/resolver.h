@@ -7,7 +7,7 @@
 
 namespace minik {
 
-enum class SymbolState { DECLARED, DEFINED, LABEL };
+enum class SymbolState { DECLARED, DEFINED, NAKED_LABEL, LOOP_LABEL };
 using ResolverScope = std::unordered_map<std::string, SymbolState>;
 
 enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
@@ -54,7 +54,7 @@ private:
 	void resolve_local(const Expression& expression, const Token& token);
 	void resolve_function(const FunctionStatement& s, FunctionType type);
 
-	bool label_exists(const Token& label);
+	bool label_exists(const Token& label, SymbolState state);
 
 	void begin_scope();
 	void end_scope();

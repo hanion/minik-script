@@ -9,6 +9,21 @@ namespace minik {
 
 
 void Resolver::resolve_block(const std::vector<Ref<Statement>>& statements) {
+	// collect labels
+	for (const Ref<Statement>& statement : statements) {
+		if (LabelStatement* s = dynamic_cast<LabelStatement*>(statement.get())) {
+			ResolverScope& scope = m_scopes.back();
+			if (scope.count(s->name.lexeme) > 0) {
+				report_error(s->name.line, "Variable with name '"+s->name.lexeme+"' already exists in this scope.");
+			}
+			if (s->loop) {
+				scope[s->name.lexeme] = SymbolState::LOOP_LABEL;
+			} else {
+				scope[s->name.lexeme] = SymbolState::NAKED_LABEL;
+			}
+		}
+	}
+
 	for (const Ref<Statement>& statement : statements) {
 		resolve(statement);
 	}
@@ -127,21 +142,22 @@ void Resolver::visit(const ReturnStatement& s) {
 	}
 }
 
-bool Resolver::label_exists(const Token& label) {
+bool Resolver::label_exists(const Token& label, SymbolState state) {
 	for (int i = m_scopes.size() - 1; i >= 0; i--) {
 		if (m_scopes[i].count(label.lexeme) > 0) {
-			return m_scopes[i].at(label.lexeme) == SymbolState::LABEL;
+			return m_scopes[i].at(label.lexeme) == state;
 		}
 	}
 	return false;
 }
+
 void Resolver::visit(const BreakStatement& s) {
 	if (m_current_loop != LoopType::FOR) {
 		report_error(s.keyword.line, "Invalid 'break' statement: 'break' can only be used inside a loop.");
 	}
 	if (s.keyword.type == IDENTIFIER) {
-		if (!label_exists(s.keyword)) {
-			report_error(s.keyword.line, "Invalid 'break' label: The label '"+s.keyword.lexeme+"' does not exist in the current scope.");
+		if (!label_exists(s.keyword, SymbolState::LOOP_LABEL)) {
+			report_error(s.keyword.line, "Invalid 'break' label: The loop label '"+s.keyword.lexeme+"' does not exist in the current scope.");
 		}
 	}
 }
@@ -150,8 +166,8 @@ void Resolver::visit(const ContinueStatement& s) {
 		report_error(s.keyword.line, "Invalid 'continue' statement: 'continue' can only be used inside a loop.");
 	}
 	if (s.keyword.type == IDENTIFIER) {
-		if (!label_exists(s.keyword)) {
-			report_error(s.keyword.line, "Invalid 'continue' label: The label '"+s.keyword.lexeme+"' does not exist in the current scope.");
+		if (!label_exists(s.keyword, SymbolState::LOOP_LABEL)) {
+			report_error(s.keyword.line, "Invalid 'continue' label: The loop label '"+s.keyword.lexeme+"' does not exist in the current scope.");
 		}
 	}
 }
@@ -211,10 +227,12 @@ void Resolver::visit(const DeferStatement& s) {
 void Resolver::visit(const LabelStatement& s) {
 	if (m_scopes.size() > 0)  {
 		ResolverScope& scope = m_scopes.back();
-		if (scope.count(s.name.lexeme) > 0) {
-			report_error(s.name.line, "Variable with name '"+s.name.lexeme+"' already exists in this scope.");
+
+		if (s.loop) {
+			scope[s.name.lexeme] = SymbolState::LOOP_LABEL;
+		} else {
+			scope[s.name.lexeme] = SymbolState::NAKED_LABEL;
 		}
-		scope[s.name.lexeme] = SymbolState::LABEL;
 	}
 
 	if (s.loop) {
@@ -223,6 +241,9 @@ void Resolver::visit(const LabelStatement& s) {
 }
 
 void Resolver::visit(const GotoStatement& s) {
+	if (!label_exists(s.label, SymbolState::NAKED_LABEL)) {
+		report_error(s.label.line, "Invalid 'goto' label: The label '"+s.label.lexeme+"' does not exist in the current scope.");
+	}
 }
 
 
