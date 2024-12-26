@@ -47,7 +47,7 @@ cd minik-script
 # or build with cmake
 mkdir build && cd build
 cmake ..
-make
+cmake --build .
 
 ```
 
