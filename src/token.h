@@ -23,6 +23,7 @@ enum TokenType {
 	IDENTIFIER, STRING, NUMBER,
 
 	AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
+	NAMESPACE,
 	RETURN, SUPER, THIS, TRUE, WHILE,
 	BREAK, CONTINUE,
 	LABEL, GOTO,
@@ -66,6 +67,7 @@ const static std::string token_type_to_string(TokenType type) {
 
 		case AND:             return "AND";
 		case CLASS:           return "CLASS";
+		case NAMESPACE:       return "NAMESPACE";
 		case ELSE:            return "ELSE";
 		case FALSE:           return "FALSE";
 		case FUN:             return "FUN";
@@ -108,5 +110,8 @@ public:
 
 };
 
+
+static const Token THIS_TOKEN = {IDENTIFIER, "this", {}, 0};
+static const Token NAMESPACE_TOKEN = {IDENTIFIER, "namespace", {}, 0};
 
 }

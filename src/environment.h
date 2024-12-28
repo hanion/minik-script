@@ -30,6 +30,17 @@ public:
 		values.emplace(name.lexeme, Symbol{true, value});
 	}
 
+	bool has(const std::string& name) {
+		auto it = values.find(name);
+		if (it != values.end()) {
+			return true;
+		}
+		if (enclosing) {
+			return enclosing->has(name);
+		}
+		return false;
+	}
+
 	Ref<Object> get(const Token& name) {
 		auto it = values.find(name.lexeme);
 		if (it != values.end()) {

@@ -67,4 +67,23 @@ void MinikInstance::set(const Token& name, const Ref<Object>& value) {
 }
 
 
+Ref<Object> MinikNamespace::get(const std::string& name) {
+	auto field = fields.find(name);
+	if (field != fields.end()) {
+		return field->second;
+	}
+	auto method = methods.find(name);
+	if (method != methods.end()) {
+		return CreateRef<Object>(method->second);
+	}
+
+	auto callable = callables.find(name);
+	if (callable != callables.end()) {
+		return CreateRef<Object>(callable->second);
+	}
+
+	return nullptr;
+}
+
+
 }

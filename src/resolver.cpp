@@ -14,7 +14,8 @@ void Resolver::resolve_block(const std::vector<Ref<Statement>>& statements) {
 		if (LabelStatement* s = dynamic_cast<LabelStatement*>(statement.get())) {
 			ResolverScope& scope = m_scopes.back();
 			if (scope.count(s->name.lexeme) > 0) {
-				report_error(s->name.line, "Variable with name '"+s->name.lexeme+"' already exists in this scope.");
+				report_error(s->name.line, "Variable with name '"
+					+s->name.lexeme+"' already exists in this scope.");
 			}
 			if (s->loop) {
 				scope[s->name.lexeme] = SymbolState::LOOP_LABEL;
@@ -77,7 +78,8 @@ void Resolver::declare(const Token& name) {
 	ResolverScope& scope = m_scopes.back();
 
 	if (scope.count(name.lexeme) > 0) {
-		report_error(name.line, "Variable with name '"+name.lexeme+"' already exists in this scope.");
+		report_error(name.line, "Variable with name '"
+			   +name.lexeme+"' already exists in this scope.");
 	}
 
 	scope[name.lexeme] = SymbolState::DECLARED;
@@ -131,7 +133,7 @@ void Resolver::visit(const IfStatement& s) {
 }
 
 void Resolver::visit(const ReturnStatement& s) {
-	if (m_current_function != FunctionType::FUNCTION) {
+	if (m_current_function != FunctionType::FUNCTION && m_current_function != FunctionType::METHOD) {
 		report_error(s.keyword.line, "Cannot return from outside of functions.");
 	}
 	if (s.value) {
@@ -157,7 +159,8 @@ void Resolver::visit(const BreakStatement& s) {
 	}
 	if (s.keyword.type == IDENTIFIER) {
 		if (!label_exists(s.keyword, SymbolState::LOOP_LABEL)) {
-			report_error(s.keyword.line, "Invalid 'break' label: The loop label '"+s.keyword.lexeme+"' does not exist in the current scope.");
+			report_error(s.keyword.line, "Invalid 'break' label: The loop label '"
+				+s.keyword.lexeme+"' does not exist in the current scope.");
 		}
 	}
 }
@@ -167,7 +170,8 @@ void Resolver::visit(const ContinueStatement& s) {
 	}
 	if (s.keyword.type == IDENTIFIER) {
 		if (!label_exists(s.keyword, SymbolState::LOOP_LABEL)) {
-			report_error(s.keyword.line, "Invalid 'continue' label: The loop label '"+s.keyword.lexeme+"' does not exist in the current scope.");
+			report_error(s.keyword.line, "Invalid 'continue' label: The loop label '"
+				+s.keyword.lexeme+"' does not exist in the current scope.");
 		}
 	}
 }
@@ -215,6 +219,24 @@ void Resolver::visit(const ClassStatement& s) {
 	m_current_class = enclosing_class;
 }
 
+void Resolver::visit(const NamespaceStatement& s) {
+	NamespaceType enclosing_namespace = m_current_namespace;
+	m_current_namespace = NamespaceType::NAMESPACE;
+
+	declare(s.name);
+	define(s.name);
+
+	begin_scope();
+
+	for (const Ref<FunctionStatement>& method : s.methods) {
+		resolve_function(*method.get(), FunctionType::FUNCTION);
+	}
+
+	end_scope();
+
+	m_current_namespace = enclosing_namespace;
+}
+
 void Resolver::visit(const DeferStatement& s) {
 	if (m_current_block == nullptr) {
 		report_error(s.token.line, "'defer' can only be used inside a block.");
@@ -242,7 +264,8 @@ void Resolver::visit(const LabelStatement& s) {
 
 void Resolver::visit(const GotoStatement& s) {
 	if (!label_exists(s.label, SymbolState::NAKED_LABEL)) {
-		report_error(s.label.line, "Invalid 'goto' label: The label '"+s.label.lexeme+"' does not exist in the current scope.");
+		report_error(s.label.line, "Invalid 'goto' label: The label '"
+			   +s.label.lexeme+"' does not exist in the current scope.");
 	}
 }
 
@@ -253,7 +276,8 @@ void Resolver::visit(const VariableExpression& e) {
 		auto it = m_scopes.back().find(e.name.lexeme);
 		if (it != m_scopes.back().end()) {
 			if (it->second != SymbolState::DEFINED) {
-				report_error(e.name.line, "Cannot read local variable '"+e.name.lexeme+"' in its own initializer.");
+				report_error(e.name.line, "Cannot read local variable '"
+				 +e.name.lexeme+"' in its own initializer.");
 			}
 		}
 	}

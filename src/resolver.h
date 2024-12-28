@@ -13,6 +13,7 @@ using ResolverScope = std::unordered_map<std::string, SymbolState>;
 enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
 enum class LoopType { NONE, FOR };
 enum class ClassType { NONE, CLASS };
+enum class NamespaceType { NONE, NAMESPACE };
 
 class Resolver : public Visitor {
 public:
@@ -43,6 +44,7 @@ public:
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
+	virtual void visit(const NamespaceStatement& s)  override;
 	virtual void visit(const DeferStatement& s)      override;
 	virtual void visit(const LabelStatement& s)      override;
 	virtual void visit(const GotoStatement& s)       override;
@@ -71,6 +73,7 @@ private:
 	FunctionType m_current_function = FunctionType::NONE;
 	LoopType m_current_loop = LoopType::NONE;
 	ClassType m_current_class = ClassType::NONE;
+	NamespaceType m_current_namespace = NamespaceType::NONE;
 
 	BlockStatement* m_current_block = nullptr;
 

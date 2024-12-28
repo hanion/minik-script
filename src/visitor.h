@@ -27,6 +27,7 @@ class ContinueStatement;
 class FunctionStatement;
 class ReturnStatement;
 class ClassStatement;
+class NamespaceStatement;
 class DeferStatement;
 class LabelStatement;
 class GotoStatement;
@@ -61,6 +62,7 @@ public:
 	virtual void visit(const FunctionStatement& s) {}
 	virtual void visit(const ReturnStatement& s) {}
 	virtual void visit(const ClassStatement& s) {}
+	virtual void visit(const NamespaceStatement& s) {}
 	virtual void visit(const DeferStatement& s) {}
 	virtual void visit(const LabelStatement& s) {}
 	virtual void visit(const GotoStatement& s) {}

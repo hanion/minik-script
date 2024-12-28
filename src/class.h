@@ -9,7 +9,9 @@ namespace minik {
 class MinikFunction;
 class VariableStatement;
 using MethodsMap = std::unordered_map<std::string, Ref<MinikFunction>>;
+using CallablesMap = std::unordered_map<std::string, Ref<MinikCallable>>;
 using MembersMap = std::unordered_map<std::string, Ref<VariableStatement>>;
+using FieldsMap = std::unordered_map<std::string, Ref<Object>>;
 
 
 class MinikClass : public MinikCallable {
@@ -41,7 +43,22 @@ public:
 
 public:
 	MinikClass clas;
-	std::unordered_map<std::string, Ref<Object>> fields = {};
+	FieldsMap fields = {};
+};
+
+class MinikNamespace {
+public:
+	MinikNamespace(const std::string& name)
+		: name(name) {}
+
+	Ref<Object> get(const std::string& name);
+
+	const std::string to_string() const { return "<namespace " + name + ">"; }
+
+	const std::string name;
+	MethodsMap methods = {};
+	CallablesMap callables = {};
+	FieldsMap fields = {};
 };
 
 }

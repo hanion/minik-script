@@ -8,12 +8,15 @@
 
 namespace minik {
 
-static const Token THIS_TOKEN = {IDENTIFIER, "this", {}, 0};
 
 Ref<Object> MinikFunction::call(Interpreter& interpreter, const std::vector<Ref<Object>>& arguments) {
 	Ref<Environment> env = CreateRef<Environment>(m_closure);
 	for (int i = 0; i < m_declaration.params.size(); i++) {
 		env->define(m_declaration.params[i], arguments[i]);
+	}
+
+	if (m_namespace) {
+		env->define(NAMESPACE_TOKEN, m_namespace);
 	}
 
 	try {

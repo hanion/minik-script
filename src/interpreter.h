@@ -41,6 +41,7 @@ public:
 	virtual void visit(const FunctionStatement& s)   override;
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
+	virtual void visit(const NamespaceStatement& s)  override;
 	virtual void visit(const DeferStatement& s)      override;
 	virtual void visit(const LabelStatement& s)      override;
 	virtual void visit(const GotoStatement& s)       override;
@@ -59,7 +60,12 @@ private:
 	void execute(const Ref<Statement>& statement);
 	void execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment, const std::vector<Ref<Statement>>& deferred_statements = {});
 
+	void collect_predefinition(Statement* s);
 	void collect_predefinitions(const std::vector<Ref<Statement>>& statements);
+
+
+	Ref<Object> create_class(const ClassStatement& s);
+	Ref<Object> create_namespace(const NamespaceStatement& s);
 
 private:
 	Ref<Environment> m_globals = CreateRef<Environment>();

@@ -1,0 +1,54 @@
+// namespace.mn
+
+
+// 3.141592 % 3 == 0.141592
+Debug.log(Math.mod(Math.PI, Math.log(1000)));
+
+
+// this should not run
+remainder :: (a, b) {
+	return 99999;
+}
+
+
+Math :: namespace {
+	PI :: 3.141592;
+
+	log :: (a) {
+		count := 0;
+		while a >= 10 {
+			a = a / 10;
+			++count;
+		}
+		return count;
+	}
+
+	mod :: (a, b) {
+		if a < 0 {
+			return remainder(abs(a), abs(b)) * -1;
+		} else {
+			return remainder(abs(a), abs(b));
+		}
+	}
+
+	remainder :: (a, b) {
+		while a >= b {
+			a = a - b;
+		}
+		return a;
+	}
+
+	abs :: (x) {
+		if x < 0 {
+			return -x;
+		}
+		return x;
+	}
+}
+
+
+Debug :: namespace {
+	log :: (msg) {
+		print(msg);
+	}
+}

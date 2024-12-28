@@ -41,11 +41,22 @@ void Interpreter::resolve(const Expression& expression, int depth) {
 }
 
 Ref<Object> Interpreter::look_up_variable(const Token& name, const Expression& expression) {
+	if (m_environment->has(NAMESPACE_TOKEN.lexeme)) {
+		Ref<Object> ns = m_environment->get(NAMESPACE_TOKEN);
+		if (ns->is_namespace()) {
+			Ref<Object> result = ns->as_namespace()->get(name.lexeme);
+			if (result) {
+				return result;
+			}
+		}
+	}
+
 	auto it = m_locals.find(&expression);
 	if (it != m_locals.end()) {
 		int distance = it->second;
 		return m_environment->get_at(distance, name);
 	}
+
 	return m_globals->get(name);
 }
 
@@ -130,7 +141,13 @@ void Interpreter::visit(const GetExpression& e) {
 		return;
 	}
 
-	throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
+	if (object->is_namespace()) {
+		m_result = object->as_namespace()->get(e.name.lexeme);
+		return;
+	}
+
+
+	throw InterpreterException(e.name, "Attempted to access property of a non-instance object." + e.name.lexeme + object->to_string());
 }
 void Interpreter::visit(const SetExpression& e) {
 	Ref<Object> object = evaluate(e.object);
@@ -231,9 +248,9 @@ void Interpreter::visit(const ReturnStatement& s) {
 	throw ReturnException{value};
 }
 
-void Interpreter::visit(const ClassStatement& s) {
+Ref<Object> Interpreter::create_class(const ClassStatement& s) {
 	Ref<Object> result = CreateRef<Object>(nullptr);
- 	m_environment->define(s.name, result);
+	m_environment->predefine(s.name, result);
 
 	MethodsMap methods(s.methods.size());
 	for (const Ref<FunctionStatement>& method : s.methods) {
@@ -247,6 +264,37 @@ void Interpreter::visit(const ClassStatement& s) {
 	}
 
 	result->value = CreateRef<MinikClass>(s.name.lexeme, methods, members);
+	return result;
+}
+
+Ref<Object> Interpreter::create_namespace(const NamespaceStatement& s) {
+	Ref<Object> result = CreateRef<Object>(CreateRef<MinikNamespace>(s.name.lexeme));
+
+	MethodsMap methods(s.methods.size());
+	for (const Ref<FunctionStatement>& method : s.methods) {
+		methods[method->name.lexeme] = CreateRef<MinikFunction>(*method.get(), m_environment, false, result);
+	}
+
+	FieldsMap fields(s.members.size());
+	for (const Ref<VariableStatement>& member : s.members) {
+		VariableStatement& vs = *member.get();
+		Ref<Object> value;
+		if (vs.initializer) {
+			value = evaluate(vs.initializer);
+		}
+		fields[member->name.lexeme] = value;
+	}
+
+	result->as_namespace()->methods = methods;
+	result->as_namespace()->fields = fields;
+	return result;
+}
+
+void Interpreter::visit(const ClassStatement& s) {
+ 	m_environment->define(s.name, m_environment->get(s.name));
+}
+void Interpreter::visit(const NamespaceStatement& s) {
+ 	m_environment->define(s.name, m_environment->get(s.name));
 }
 
 void Interpreter::visit(const UnaryExpression& e) {
@@ -530,28 +578,21 @@ void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, c
 	exit_block();
 }
 
+
+
+void Interpreter::collect_predefinition(Statement* s) {
+	if (FunctionStatement* statement = dynamic_cast<FunctionStatement*>(s)) {
+		Ref<MinikFunction> function = CreateRef<MinikFunction>(*statement, m_environment);
+		m_environment->predefine(statement->name, CreateRef<Object>(function));
+	} else if (ClassStatement* statement = dynamic_cast<ClassStatement*>(s)) {
+		m_environment->predefine(statement->name, create_class(*statement));
+	} else if (NamespaceStatement* statement = dynamic_cast<NamespaceStatement*>(s)) {
+		m_environment->predefine(statement->name, create_namespace(*statement));
+	}
+}
 void Interpreter::collect_predefinitions(const std::vector<Ref<Statement>>& statements) {
 	for (auto& s : statements) {
-		if (FunctionStatement* statement = dynamic_cast<FunctionStatement*>(s.get())) {
-			Ref<MinikFunction> function = CreateRef<MinikFunction>(*statement, m_environment);
-			m_environment->predefine(statement->name, CreateRef<Object>(function));
-		} else if (ClassStatement* statement = dynamic_cast<ClassStatement*>(s.get())) {
-			Ref<Object> result = CreateRef<Object>(nullptr);
-
-			MethodsMap methods(statement->methods.size());
-			for (const Ref<FunctionStatement>& method : statement->methods) {
-				bool is_initializer = (method->name.lexeme == statement->name.lexeme);
-				methods[method->name.lexeme] = CreateRef<MinikFunction>(*method.get(), m_environment, is_initializer);
-			}
-
-			MembersMap members(statement->members.size());
-			for (const Ref<VariableStatement>& member : statement->members) {
-				members[member->name.lexeme] = member;
-			}
-
-			result->value = CreateRef<MinikClass>(statement->name.lexeme, methods, members);
-			m_environment->predefine(statement->name, result);
-		}
+		collect_predefinition(s.get());
 	}
 }
 

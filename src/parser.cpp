@@ -367,6 +367,10 @@ Ref<Statement> Parser::typed_declaration() {
 				match(COLON);
 				match(CLASS);
 				return class_declaration(identifier);
+			} else if (check_next(NAMESPACE)) {
+				match(COLON);
+				match(NAMESPACE);
+				return namespace_declaration(identifier);
 			}
 		}
 	}
@@ -525,6 +529,28 @@ Ref<Statement> Parser::class_declaration(const Token& identifier) {
 
 	consume(RIGHT_BRACE, "Expected '}' after class body.");
 	return CreateRef<ClassStatement>(identifier, methods, members);
+}
+
+Ref<Statement> Parser::namespace_declaration(const Token& identifier) {
+	consume(LEFT_BRACE, "Expected '{' after namespace declaration.");
+
+	std::vector<Ref<FunctionStatement>> methods = {};
+	std::vector<Ref<VariableStatement>> members = {};
+	while (!check(RIGHT_BRACE) && !is_at_end()) {
+		if (check(IDENTIFIER) && check_next(COLON)) {
+			Ref<Statement> s = typed_declaration();
+			if (auto vs = std::dynamic_pointer_cast<VariableStatement>(s)) {
+				members.push_back(vs);
+			} else if (auto fs = std::dynamic_pointer_cast<FunctionStatement>(s)) {
+				methods.push_back(fs);
+			}
+		} else {
+			break;
+		}
+	}
+
+	consume(RIGHT_BRACE, "Expected '}' after namespace body.");
+	return CreateRef<NamespaceStatement>(identifier, methods, members);
 }
 
 
