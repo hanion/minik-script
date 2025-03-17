@@ -44,7 +44,7 @@ Ref<Object> Interpreter::look_up_variable(const Token& name, const Expression& e
 	if (m_environment->has(NAMESPACE_TOKEN.lexeme)) {
 		Ref<Object> ns = m_environment->get(NAMESPACE_TOKEN);
 		if (ns->is_namespace()) {
-			Ref<Object> result = ns->as_namespace()->get(name.lexeme);
+			Ref<Object> result = ns->as_namespace()->get(name);
 			if (result) {
 				return result;
 			}
@@ -108,15 +108,29 @@ void Interpreter::visit(const LogicalExpression& e) {
 void Interpreter::visit(const CallExpression& e) {
 	Ref<Object> callee = evaluate(e.callee);
 
-	std::vector<Ref<Object>> arguments;
-	arguments.reserve(e.arguments.size());
-	for (const Ref<Expression>& argument : e.arguments) {
-		arguments.emplace_back(evaluate(argument));
+	if (!callee) {
+		m_result = nullptr;
+		throw InterpreterException(e.paren, "Callee is null.");
 	}
 
 	if (!callee->is_callable()) {
 		m_result = nullptr;
 		throw InterpreterException(e.paren, "Object is not callable.");
+	}
+
+	std::vector<Ref<Object>> arguments;
+	arguments.reserve(e.arguments.size());
+	for (const Ref<Expression>& argument : e.arguments) {
+		Ref<Object> arg = evaluate(argument);
+		if (!arg) {
+			throw InterpreterException(e.paren, "Object is not callable.");
+			continue;
+		}
+		if (!arg->is_list()) {
+			// NOTE: we copy the variable here
+			arg = CreateRef<Object>(arg);
+		}
+		arguments.emplace_back(arg);
 	}
 
 	const Ref<MinikCallable>& function = callee->as_callable();
@@ -142,7 +156,7 @@ void Interpreter::visit(const GetExpression& e) {
 	}
 
 	if (object->is_namespace()) {
-		m_result = object->as_namespace()->get(e.name.lexeme);
+		m_result = object->as_namespace()->get(e.name);
 		return;
 	}
 
@@ -151,13 +165,22 @@ void Interpreter::visit(const GetExpression& e) {
 }
 void Interpreter::visit(const SetExpression& e) {
 	Ref<Object> object = evaluate(e.object);
-	if (!object->is_instance()) {
-		throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
+
+	if (object->is_instance()) {
+		Ref<Object> var = CreateRef<Object>(evaluate(e.value));
+		object->as_instance()->set(e.name, var);
+		m_result = var;
+		return;
+	}
+	if (object->is_namespace()) {
+		Ref<Object> var = object->as_namespace()->get(e.name);
+		var->value = evaluate(e.value)->value;
+		m_result = var;
+		return;
 	}
 
-	Ref<Object> value = evaluate(e.value);
-	object->as_instance()->set(e.name, CreateRef<Object>(value));
-	m_result = value;
+
+	throw InterpreterException(e.name, "Attempted to access property of a non-instance object.");
 }
 
 void Interpreter::visit(const ThisExpression& e) {
@@ -263,38 +286,69 @@ Ref<Object> Interpreter::create_class(const ClassStatement& s) {
 		members[member->name.lexeme] = member;
 	}
 
-	result->value = CreateRef<MinikClass>(s.name.lexeme, methods, members);
+	result->value = CreateRef<MinikClass>(s.name.lexeme, methods, members, m_environment);
 	return result;
 }
 
-Ref<Object> Interpreter::create_namespace(const NamespaceStatement& s) {
-	Ref<Object> result = CreateRef<Object>(CreateRef<MinikNamespace>(s.name.lexeme));
+Ref<Object> Interpreter::create_namespace(const NamespaceStatement& statement) {
+	const Ref<MinikNamespace> enclosing_namespace = m_namespace;
+	Ref<MinikNamespace> new_namespace;
 
-	MethodsMap methods(s.methods.size());
-	for (const Ref<FunctionStatement>& method : s.methods) {
-		methods[method->name.lexeme] = CreateRef<MinikFunction>(*method.get(), m_environment, false, result);
+	const Ref<Environment> enclosing = m_environment;
+	if (enclosing->has(statement.name.lexeme)) {
+		new_namespace = enclosing->get(statement.name)->as_namespace();
+	} else {
+		new_namespace = CreateRef<MinikNamespace>(statement.name.lexeme, enclosing_namespace);
 	}
 
-	FieldsMap fields(s.members.size());
-	for (const Ref<VariableStatement>& member : s.members) {
-		VariableStatement& vs = *member.get();
-		Ref<Object> value;
-		if (vs.initializer) {
-			value = evaluate(vs.initializer);
+	m_namespace = new_namespace;
+	m_environment = CreateRef<Environment>(enclosing);
+
+
+
+	Ref<Object> result = CreateRef<Object>(new_namespace);
+	if (enclosing->ancestor(1)) {
+		enclosing->ancestor(1)->predefine(statement.name, result);
+	}
+	enclosing->predefine(statement.name, result);
+	m_environment->predefine(statement.name, result);
+
+
+
+	// FIX: namespace scopes are wrong, this works for the test cases for now
+	// but not for the dev.mn
+	// namespace probably needs its own environment, and resolver needs to reflect that
+
+	for (Ref<Statement> st : statement.body) {
+		Statement* sptr = st.get();
+		if (VariableStatement* s = dynamic_cast<VariableStatement*>(sptr)) {
+			execute(st);
+			new_namespace->fields[s->name.lexeme] = m_result;
+		} else if (FunctionStatement* s = dynamic_cast<FunctionStatement*>(sptr)) {
+// 			MN_LOG("creating field %s to %s", s->name.lexeme.c_str(), statement.name.lexeme.c_str());
+			Ref<Object> fn = CreateRef<Object>(CreateRef<MinikFunction>(*s, m_environment, false, result));
+			new_namespace->fields[s->name.lexeme] = fn;
+
+			m_environment->predefine(s->name, fn);
+		} else if (ClassStatement* s = dynamic_cast<ClassStatement*>(sptr)) {
+			new_namespace->fields[s->name.lexeme] = create_class(*s);
+		} else if (NamespaceStatement* s = dynamic_cast<NamespaceStatement*>(sptr)) {
+// 			MN_LOG("creating namespace %s to %s", s->name.lexeme.c_str(), statement.name.lexeme.c_str());
+// 			MN_LOG("	%s, in %s", m_namespace->name.c_str(), enclosing_namespace->name.c_str());
+			new_namespace->fields[s->name.lexeme] = create_namespace(*s);
 		}
-		fields[member->name.lexeme] = value;
 	}
 
-	result->as_namespace()->methods = methods;
-	result->as_namespace()->fields = fields;
+	m_namespace = enclosing_namespace;
+	m_environment = enclosing;
 	return result;
 }
 
 void Interpreter::visit(const ClassStatement& s) {
- 	m_environment->define(s.name, m_environment->get(s.name));
+	m_environment->define(s.name, m_environment->get(s.name));
 }
 void Interpreter::visit(const NamespaceStatement& s) {
- 	m_environment->define(s.name, m_environment->get(s.name));
+ 	m_environment->predefine(s.name, m_environment->get(s.name));
 }
 
 void Interpreter::visit(const UnaryExpression& e) {
@@ -472,6 +526,7 @@ void Interpreter::visit(const LabelStatement& s) {
 void Interpreter::visit(const GotoStatement& s) {
 	throw GotoException{s.label};
 }
+
 void Interpreter::visit(const ForStatement& s) {
 	const Ref<Environment>& loop_environment = CreateRef<Environment>(m_environment);
 	const Ref<Environment> previous = m_environment;
@@ -529,6 +584,7 @@ void Interpreter::execute(const Ref<Statement>& statement) {
 void Interpreter::execute_block(const std::vector<Ref<Statement>>& statements, const Ref<Environment>& environment, const std::vector<Ref<Statement>>& deferred_statements) {
 	const Ref<Environment> previous = m_environment;
 	m_environment = environment;
+
 	const auto exit_block = [&]() {
 		//exit block
 		if (deferred_statements.size() > 0) {

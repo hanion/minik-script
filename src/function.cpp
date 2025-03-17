@@ -11,6 +11,10 @@ namespace minik {
 
 Ref<Object> MinikFunction::call(Interpreter& interpreter, const std::vector<Ref<Object>>& arguments) {
 	Ref<Environment> env = CreateRef<Environment>(m_closure);
+	if (m_callable) {
+		return m_callable->call(interpreter, arguments);
+	}
+
 	for (int i = 0; i < m_declaration.params.size(); i++) {
 		env->define(m_declaration.params[i], arguments[i]);
 	}
@@ -35,17 +39,27 @@ Ref<Object> MinikFunction::call(Interpreter& interpreter, const std::vector<Ref<
 }
 
 int MinikFunction::arity() {
+	if (m_callable) {
+		return m_callable->arity();
+	}
 	return m_declaration.params.size();
 }
 
 std::string MinikFunction::to_string() const {
+	if (m_callable) {
+		return m_callable->to_string();
+	}
 	return "<fn " + m_declaration.name.lexeme + ">";
 }
 
 Ref<MinikFunction> MinikFunction::bind(const Ref<MinikInstance>& instance) {
 	Ref<Environment> env = CreateRef<Environment>(m_closure);
 	env->define(THIS_TOKEN, CreateRef<Object>(instance));
-	return CreateRef<MinikFunction>(m_declaration, env, m_is_initializer);
+
+	if (m_callable) {
+		return CreateRef<MinikFunction>(m_callable, env, m_is_initializer, m_namespace);
+	}
+	return CreateRef<MinikFunction>(m_declaration, env, m_is_initializer, m_namespace);
 }
 
 }

@@ -58,7 +58,11 @@ Ref<Object> mcPrint::call(Interpreter& interpreter, const Arguments& arguments) 
 
 	std::string str;
 	for (size_t i = 0; i < arguments.size(); ++i) {
-		str += arguments[i]->to_string();
+		if (arguments[i]) {
+			str += arguments[i]->to_string();
+		} else {
+			str += "[NULL]";
+		}
 		if (i != arguments.size()-1) {
 			str += " ";
 		}

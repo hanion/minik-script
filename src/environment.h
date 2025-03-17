@@ -55,11 +55,13 @@ public:
 	}
 
 	Ref<Object> get_at(int distance, const Token& name) {
-		Environment& env = ancestor(distance);
+		Environment* env = ancestor(distance);
 
-		auto it = env.values.find(name.lexeme);
-		if (it != env.values.end()) {
-			return it->second.object;
+		if (env) {
+			auto it = env->values.find(name.lexeme);
+			if (it != env->values.end()) {
+				return it->second.object;
+			}
 		}
 
 		// UNREACHABLE
@@ -68,12 +70,12 @@ public:
 				+std::to_string(name.line)+"] (distance "+std::to_string(distance)+", token '"+name.lexeme+"')");
 	}
 
-	Environment& ancestor(int distance) {
+	Environment* ancestor(int distance) {
 		Environment* env = this;
 		for (int i = 0; i < distance; ++i) {
 			env = env->enclosing.get();
 		}
-		return *env;
+		return env;
 	}
 
 

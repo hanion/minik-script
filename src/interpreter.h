@@ -1,6 +1,7 @@
 #pragma once
 
 #include "callable.h"
+#include "class.h"
 #include "function.h"
 #include "environment.h"
 #include "expression.h"
@@ -65,14 +66,16 @@ private:
 
 
 	Ref<Object> create_class(const ClassStatement& s);
-	Ref<Object> create_namespace(const NamespaceStatement& s);
+	Ref<Object> create_namespace(const NamespaceStatement& statement);
 
 private:
 	Ref<Environment> m_globals = CreateRef<Environment>();
 	Ref<Environment> m_environment = m_globals;
+	Ref<MinikNamespace> m_namespace = CreateRef<MinikNamespace>("GLOBAL", nullptr);
 	std::unordered_map<const Expression*, int> m_locals = {};
 	Ref<Object> m_result = nullptr;
 friend MinikFunction;
+friend MinikCallable;
 friend MinikClass;
 };
 

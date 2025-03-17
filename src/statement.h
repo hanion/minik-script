@@ -124,11 +124,10 @@ struct ClassStatement : public Statement {
 
 struct NamespaceStatement : public Statement {
 	Token name;
-	std::vector<Ref<FunctionStatement>> methods;
-	std::vector<Ref<VariableStatement>> members;
+	std::vector<Ref<Statement>> body;
 
-	NamespaceStatement(const Token& name, const std::vector<Ref<FunctionStatement>>& methods, const std::vector<Ref<VariableStatement>>& members)
-		: name(name), methods(methods), members(members) {}
+	NamespaceStatement(const Token& name, const std::vector<Ref<Statement>>& body)
+		: name(name), body(body) {}
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };

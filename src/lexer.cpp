@@ -110,7 +110,7 @@ char Lexer::advance() {
 	return m_source.at(m_current++);
 }
 void Lexer::add_token(TokenType type) {
-	add_token(type, CreateRef<Object>(nullptr));
+	add_token(type, nullptr);
 }
 void Lexer::add_token(TokenType type, Object literal) {
 	std::string text = substr(m_start, m_current);

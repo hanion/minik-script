@@ -216,6 +216,11 @@ void Resolver::visit(const ClassStatement& s) {
 
 	end_scope();
 
+	for (const Ref<VariableStatement>& member : s.members) {
+		resolve(member);
+	}
+
+
 	m_current_class = enclosing_class;
 }
 
@@ -223,13 +228,13 @@ void Resolver::visit(const NamespaceStatement& s) {
 	NamespaceType enclosing_namespace = m_current_namespace;
 	m_current_namespace = NamespaceType::NAMESPACE;
 
-	declare(s.name);
+// 	declare(s.name);
 	define(s.name);
 
 	begin_scope();
 
-	for (const Ref<FunctionStatement>& method : s.methods) {
-		resolve_function(*method.get(), FunctionType::FUNCTION);
+	for (const Ref<Statement>& field : s.body) {
+		resolve(field);
 	}
 
 	end_scope();

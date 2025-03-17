@@ -1,8 +1,8 @@
 // namespace.mn
 
-
 // 3.141592 % 3 == 0.141592
-Debug.log(Math.mod(Math.PI, Math.log(1000)));
+Debug.log(Test.Math.mod(Test.Math.PI, Test.Math.log(1000)));
+Debug.log(Test.Math.PI);
 
 
 // this should not run
@@ -11,44 +11,266 @@ remainder :: (a, b) {
 }
 
 
-Math :: namespace {
-	PI :: 3.141592;
+Test :: namespace {
+	Math :: namespace {
+		PI :: 3.141592;
 
-	log :: (a) {
-		count := 0;
-		while a >= 10 {
-			a = a / 10;
-			++count;
+		log :: (a) {
+			count := 0;
+			while a >= 10 {
+				a = a / 10;
+				++count;
+			}
+			return count;
 		}
-		return count;
-	}
 
-	mod :: (a, b) {
-		if a < 0 {
-			return remainder(abs(a), abs(b)) * -1;
-		} else {
-			return remainder(abs(a), abs(b));
+		mod :: (a, b) {
+			if a < 0 {
+				return remainder(abs(a), abs(b)) * -1;
+			} else {
+				return remainder(abs(a), abs(b));
+			}
 		}
-	}
 
-	remainder :: (a, b) {
-		while a >= b {
-			a = a - b;
+		remainder :: (a, b) {
+			while a >= b {
+				a = a - b;
+			}
+			return a;
 		}
-		return a;
-	}
 
-	abs :: (x) {
-		if x < 0 {
-			return -x;
+		abs :: (x) {
+			if x < 0 {
+				return -x;
+			}
+			return x;
 		}
-		return x;
 	}
 }
 
 
-Debug :: namespace {
-	log :: (msg) {
-		print(msg);
+Test :: namespace {
+	Debug :: namespace {
+		log :: (msg) {
+			print(msg);
+		}
 	}
 }
+
+
+
+
+// nested namespace accessing parent namespace function
+Test :: namespace {
+	Math :: namespace {
+		add :: (a, b) {
+			return a + b;
+		}
+	}
+}
+Test :: namespace {
+	Math :: namespace {
+		Advanced :: namespace {
+			square :: (x) {
+				return x * x;
+			}
+
+			test_square :: () {
+				// should resolve to Test.Math.add
+				return add(5, square(3));
+			}
+		}
+	}
+}
+
+result :: Test.Math.Advanced.test_square();
+print(result);
+
+
+
+
+
+Test :: namespace {
+	hello :: () {
+		print("Hello from Test namespace");
+	}
+}
+
+Test.hello();
+print(Test);
+print(Test.Math);
+print(Test.Math.add);
+print(Test.Math.add(10, 20));
+
+
+Test :: namespace {
+	Math :: namespace {
+		Sub :: namespace {
+			subtract :: (a, b) {
+				return a - b;
+			}
+
+			test_subtract :: () {
+				// accessing sibling function
+				return subtract(50, 25);
+			}
+		}
+		sqrti :: (x) {
+			if x == 1 {
+				return 1;
+			}
+			for i := 1; i*i <= x; ++i {
+				if i*i == x {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		sqrt :: (x) {
+			if x == 0 {
+				return 0.0;
+			}
+			if x < 0 {
+				return -1.0;
+			}
+			guess := x / 2.0;
+			epsilon := 0.00001;
+			while abs(guess * guess - x) > epsilon {
+				guess = (guess + x / guess) / 2.0;
+			}
+			return guess;
+		}
+	}
+}
+
+print(Test.Math.Sub.test_subtract());
+
+
+
+// class inside namespace
+Test :: namespace {
+	Vector :: class {
+		x := 0;
+		y := 0;
+		Vector :: (x, y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		magnitude :: () {
+			return Math.sqrt((this.x * this.x) + (this.y * this.y));
+		}
+	}
+}
+
+v1 := Test.Vector(3, 4);
+print(v1, v1.x, v1.y, v1.magnitude());
+
+
+
+// class method accessing namespace functions
+Test :: namespace {
+	Utils :: namespace {
+		greet :: (name) {
+			return "Hello, " + name + "!";
+		}
+	}
+
+	Person :: class {
+		name : string;
+		Person :: (name) {
+			this.name = name;
+		}
+
+		greet_self :: () {
+			return Utils.greet(this.name);
+		}
+	}
+}
+
+p1 := Test.Person("han");
+print(p1.greet_self());
+
+
+
+
+// nested classes in namespaces
+Test :: namespace {
+	Shapes :: namespace {
+		Circle :: class {
+			radius := 0;
+			Circle :: (radius) {
+				this.radius = radius;
+			}
+
+			area :: () {
+				return Math.PI * this.radius * this.radius;
+			}
+		}
+	}
+}
+
+circle := Test.Shapes.Circle(10);
+print(circle.area());
+
+
+// namespace functions accessing parent namespace
+Test :: namespace {
+	Math :: namespace {
+		Advanced :: namespace {
+			square :: (x) {
+				return x * x;
+			}
+
+			test_square :: () {
+				return add(5, square(3));
+			}
+		}
+	}
+}
+
+print(Test.Math.Advanced.test_square());
+
+
+// class method calling nested namespace functions
+Test :: namespace {
+	Shapes :: namespace {
+		Rectangle :: class {
+			width  := 0;
+			height := 0;
+			Rectangle :: (width, height) {
+				this.width = width;
+				this.height = height;
+			}
+
+			some_calculation :: () {
+				return Test.Math.Advanced.square(this.width) + Math.Advanced.square(this.height);
+			}
+		}
+	}
+}
+
+rect := Test.Shapes.Rectangle(3, 4);
+print(rect.some_calculation());
+
+
+
+// scope resolution in nested environments
+Outer :: namespace {
+	x := 10;
+
+	Inner :: namespace {
+		x := 20;
+
+		test_resolution :: () {
+			print(x); // should print 20 (local scope)
+			print(Outer.x); // should print 10 (parent scope)
+		}
+	}
+}
+
+Outer.Inner.test_resolution();
+
+
+

@@ -8,6 +8,7 @@ namespace minik {
 class Object;
 class Interpreter;
 class Token;
+class MinikInstance;
 
 using Arguments = std::vector<Ref<Object>>;
 
@@ -17,6 +18,8 @@ public:
 	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments);
 	virtual int arity() { return 0; }
 	virtual std::string to_string() const { return "<fn>"; }
+
+	MinikInstance* instance = nullptr;
 };
 
 class mcClock : public MinikCallable {

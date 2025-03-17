@@ -1,1 +1,16 @@
 0.141592
+3.141592
+14.000000
+Hello from Test namespace
+<namespace Test>
+<namespace Math>
+<fn add>
+30.000000
+25.000000
+<instance of Vector> 3.000000 4.000000 5.000000
+Hello, han!
+314.159200
+14.000000
+25.000000
+20.000000
+10.000000

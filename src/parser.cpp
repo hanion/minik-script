@@ -2,7 +2,9 @@
 #include "base.h"
 #include "exception.h"
 #include "expression.h"
+#include "lexer.h"
 #include "minik.h"
+#include "resolver.h"
 #include "statement.h"
 #include "token.h"
 
@@ -534,15 +536,18 @@ Ref<Statement> Parser::class_declaration(const Token& identifier) {
 Ref<Statement> Parser::namespace_declaration(const Token& identifier) {
 	consume(LEFT_BRACE, "Expected '{' after namespace declaration.");
 
-	std::vector<Ref<FunctionStatement>> methods = {};
-	std::vector<Ref<VariableStatement>> members = {};
+	std::vector<Ref<Statement>> fields = {};
 	while (!check(RIGHT_BRACE) && !is_at_end()) {
 		if (check(IDENTIFIER) && check_next(COLON)) {
 			Ref<Statement> s = typed_declaration();
 			if (auto vs = std::dynamic_pointer_cast<VariableStatement>(s)) {
-				members.push_back(vs);
+				fields.push_back(vs);
 			} else if (auto fs = std::dynamic_pointer_cast<FunctionStatement>(s)) {
-				methods.push_back(fs);
+				fields.push_back(fs);
+			} else if (auto ns = std::dynamic_pointer_cast<NamespaceStatement>(s)) {
+				fields.push_back(ns);
+			} else if (auto cs = std::dynamic_pointer_cast<ClassStatement>(s)) {
+				fields.push_back(cs);
 			}
 		} else {
 			break;
@@ -550,7 +555,7 @@ Ref<Statement> Parser::namespace_declaration(const Token& identifier) {
 	}
 
 	consume(RIGHT_BRACE, "Expected '}' after namespace body.");
-	return CreateRef<NamespaceStatement>(identifier, methods, members);
+	return CreateRef<NamespaceStatement>(identifier, fields);
 }
 
 
