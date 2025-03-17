@@ -1,0 +1,57 @@
+// raylib_demo.mn
+
+RunRaylibDemo :: () {
+	import Raylib;
+
+	width := 800;
+	height := 600;
+	bg_color := "BLACK";
+
+	Raylib.InitWindow(width, height, "bouncing circle demo");
+
+	Ball :: class {
+		radius := 10.0;
+		pos := Raylib.Vector2();
+		speed := Raylib.Vector2();
+		Ball :: (r, p, s) {
+			this.radius = r;
+			this.pos = p;
+			this.speed = s;
+		}
+	}
+
+	ball := Ball(50, Raylib.Vector2(400, 300), Raylib.Vector2(10, 10));
+
+	while !Raylib.WindowShouldClose() {
+		Raylib.BeginDrawing();
+		Raylib.ClearBackground(bg_color);
+
+		width = Raylib.GetScreenWidth();
+		height = Raylib.GetScreenHeight();
+
+		if ball.pos.y < ball.radius {
+			ball.pos.y = ball.radius;
+			ball.speed.y = -ball.speed.y;
+		} else if ball.pos.y > height - ball.radius {
+			ball.pos.y = height - ball.radius;
+			ball.speed.y = -ball.speed.y;
+		}
+		if ball.pos.x < ball.radius {
+			ball.pos.x = ball.radius;
+			ball.speed.x = -ball.speed.x;
+		} else if ball.pos.x > width - ball.radius {
+			ball.pos.x = width - ball.radius;
+			ball.speed.x = -ball.speed.x;
+		}
+
+		ball.pos.x = ball.pos.x + ball.speed.x;
+		ball.pos.y = ball.pos.y + ball.speed.y;
+
+		Raylib.DrawCircle(ball.pos.x, ball.pos.y, ball.radius);
+		Raylib.DrawText(10, 10, "Bouncing Circle");
+
+		Raylib.EndDrawing();
+	}
+
+	Raylib.CloseWindow();
+}

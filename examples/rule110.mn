@@ -1,0 +1,152 @@
+// rule110.mn
+
+RULE110 :: namespace {
+
+SIZE :: 95;
+
+create_empty_list :: () {
+	return [
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0
+	];
+}
+
+advance_rule :: (buffer: list) {
+	new_buffer := create_empty_list();
+
+	for i := 0; i < SIZE; ++i {
+		a := 0;
+		if i > 0 {
+			a = buffer[i-1];
+		} else if i == 0 {
+			a = buffer[SIZE-1];
+		}
+		b := buffer[i];
+		c := buffer[((i+1)%SIZE)];
+
+// 		pattern := (a << 2) | (b << 1) | c;
+// 		rule := 110;
+// 		new_buffer[i] = (rule >> pattern) & 1;
+
+		result : int = 1;
+		if (a and b and c)
+			or (a and !b and !c)
+			or (!a and !b and !c) {
+			result = 0;
+		}
+
+ 		new_buffer[i] = result;
+	}
+	return new_buffer;
+}
+
+print_buffer :: (buffer: list) {
+	str: string = "";
+	for i := 0; i < SIZE; ++i {
+		if buffer[i] == 0 {
+			str = str + "  ";
+		} else if buffer[i] == 1 {
+			str = str + "██";
+		}
+	}
+	print(str);
+}
+
+run :: (amount: int) {
+	arr := create_empty_list();
+	arr[SIZE-1] = 1;
+	print_buffer(arr);
+	for i := 0; i < amount; ++i {
+		arr = advance_rule(arr);
+		print_buffer(arr);
+	}
+}
+
+
+
+
+Rule110 :: class {
+ 	buffer := create_empty_list();
+
+	Rule110 :: () {
+		this.buffer[SIZE-1] = 1;
+	}
+
+	play :: (amount: int) {
+		this.print_buffer();
+		for i := 0; i < amount; ++i {
+			this.advance_rule();
+			this.print_buffer();
+		}
+	}
+
+	print_buffer :: () {
+		str: string = "";
+		for i := 0; i < SIZE; ++i {
+			if this.buffer[i] == 0 {
+				str = str + "  ";
+			} else if this.buffer[i] == 1 {
+				str = str + "██";
+			}
+		}
+		print(str);
+	}
+
+	advance_rule :: () {
+		new_buffer := create_empty_list();
+
+		for i := 0; i < SIZE; ++i {
+			a := 0;
+			if i > 0 {
+				a = this.buffer[i-1];
+			} else if i == 0 {
+				a = this.buffer[SIZE-1];
+			}
+			b := this.buffer[i];
+			c := this.buffer[((i+1)%SIZE)];
+
+	// 		pattern := (a << 2) | (b << 1) | c;
+	// 		rule := 110;
+	// 		new_buffer[i] = (rule >> pattern) & 1;
+
+			result : int = 1;
+			if (a and b and c)
+				or (a and !b and !c)
+				or (!a and !b and !c) {
+				result = 0;
+			}
+
+			new_buffer[i] = result;
+		}
+		this.buffer = new_buffer;
+	}
+}
+
+
+
+
+start_programs :: () {
+	start := clock();
+	rule := Rule110();
+	rule.play(SIZE-1);
+	end := clock();
+	duration0 := end - start;
+
+	start = clock();
+	run(SIZE*1-1);
+	end = clock();
+	duration1 := end - start;
+	print(duration0);
+	print(duration1);
+}
+
+}
+// RULE110.start_programs();
