@@ -1,5 +1,6 @@
 #pragma once
 
+#include "database.h"
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
@@ -24,6 +25,7 @@ public:
 	const std::filesystem::path m_expected_dir;
 	const std::filesystem::path m_result_path;
 	std::string m_output_string;
+	double m_duration = 0.0;
 };
 
 
@@ -39,5 +41,7 @@ private:
 private:
 	const std::filesystem::path m_search_path;
 	std::vector<Test> m_tests;
+
+	minik::Database db;
 };
 

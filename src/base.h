@@ -1,5 +1,7 @@
 #pragma once
 
+#define MINIK_VERSION "0.4"
+
 
 #if defined(_WIN32) || defined(_WIN64)
 	#define MN_PLATFORM_WINDOWS

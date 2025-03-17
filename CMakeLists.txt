@@ -11,9 +11,10 @@ file(GLOB SOURCES
 	"src/*.cpp"
 	"tests/*.cpp"
 	"packages/*cpp"
+	"external/sqlite/*c"
 )
 
-include_directories("src" "tests")
+include_directories("src" "tests" "external")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 

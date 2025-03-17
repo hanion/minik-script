@@ -1,6 +1,7 @@
 #include "tester.h"
 #include "log.h"
 #include "minik.h"
+#include <chrono>
 
 Test::Test(std::filesystem::path test_path)
 	: m_test_name(test_path.stem()),
@@ -16,7 +17,12 @@ Test::Test(std::filesystem::path test_path)
 bool Test::run() {
 	std::ostringstream ss;
 	mn_output_stream = &ss;
+
+	auto start_time = std::chrono::high_resolution_clock::now();
 	minik::run_file(m_source_path);
+	auto end_time = std::chrono::high_resolution_clock::now();
+	m_duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+	
 	m_output_string = ss.str();
 	return true;
 }
@@ -52,14 +58,20 @@ bool Test::save_result() {
 }
 
 
+
 void Tester::run_all_tests() {
 	int failed = 0;
 
+	db.init("test_results.db");
+
 	search_directory();
 	for (Test& test : m_tests) {
-		if (not test.run_test()) {
+		bool result = test.run_test();
+		if (not result) {
 			failed++;
 		}
+		std::string result_string = result ? "passed" : "failed";
+		db.log_test_result(test.m_test_name, test.m_duration, result_string, test.m_output_string);
 	}
 
 	if (failed) {
@@ -74,7 +86,9 @@ void Tester::search_directory() {
 	for (const auto& entry : std::filesystem::directory_iterator(m_search_path)) {
 		std::filesystem::path path = entry.path();
 		if (path.has_extension() and path.extension() == ".mn") {
-			m_tests.push_back(Test(path));
+			Test test = Test(path);
+			db.log_test_details(test.m_test_name, MINIK_VERSION, "");
+			m_tests.push_back(test);
 		}
 	}
 }
