@@ -31,6 +31,7 @@ class NamespaceStatement;
 class DeferStatement;
 class LabelStatement;
 class GotoStatement;
+class ImportStatement;
 
 class Visitor {
 public:
@@ -66,6 +67,7 @@ public:
 	virtual void visit(const DeferStatement& s) {}
 	virtual void visit(const LabelStatement& s) {}
 	virtual void visit(const GotoStatement& s) {}
+	virtual void visit(const ImportStatement& s) {}
 
 };
 

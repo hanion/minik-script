@@ -242,6 +242,14 @@ void Resolver::visit(const NamespaceStatement& s) {
 	m_current_namespace = enclosing_namespace;
 }
 
+void Resolver::visit(const ImportStatement& s) {
+	if (s.is_file) {
+		resolve_block(s.statements);
+	} else {
+		define(s.name);
+	}
+}
+
 void Resolver::visit(const DeferStatement& s) {
 	if (m_current_block == nullptr) {
 		report_error(s.token.line, "'defer' can only be used inside a block.");

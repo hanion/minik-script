@@ -7,6 +7,8 @@
 #include "resolver.h"
 #include "statement.h"
 #include "token.h"
+#include <filesystem>
+#include <fstream>
 
 namespace minik {
 
@@ -324,6 +326,10 @@ Ref<Statement> Parser::statement() {
 		return goto_statement();
 	}
 
+	if (match(IMPORT)) {
+		return import_statement();
+	}
+
 	return expression_statement();
 }
 
@@ -592,6 +598,53 @@ Ref<Statement> Parser::goto_statement() {
 	const Token& id = consume(IDENTIFIER, "Expected identifier after goto.");
 	consume(SEMICOLON, "Expected ';' after goto.");
 	return CreateRef<GotoStatement>(id);
+}
+
+Ref<Statement> Parser::import_statement() {
+	std::string package_name;
+	bool is_file = false;
+
+	if (match(STRING)) {
+		package_name = previous().literal->to_string();
+		is_file = true;
+	} else {
+		const Token& id = consume(IDENTIFIER, "Expected identifier after import.");
+		package_name = id.lexeme;
+	}
+	Token name = previous();
+
+	std::string as = "";
+	if (match(AS)) {
+		const Token& ast = consume(IDENTIFIER, "Expected identifier after import as.");
+		as = ast.lexeme;
+	}
+
+	consume(SEMICOLON, "Expected ';' after import.");
+
+
+	std::vector<Ref<Statement>> statements = {};
+
+	if (is_file) {
+		if (!std::filesystem::exists(package_name)) {
+			throw ParseException(name, "import failed. File does not exist.");
+		}
+
+		std::ifstream file(std::filesystem::canonical(package_name));
+		if (!file.is_open()) {
+			throw ParseException(name, "import failed at '" + package_name + "'.");
+		}
+
+		std::string source = std::string(
+			(std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()
+		);
+
+		Lexer lexer = Lexer(source);
+		std::vector<Token>& tokens = lexer.scan_tokens();
+		Parser parser = Parser(tokens);
+		statements = parser.parse();
+		file.close();
+	}
+	return CreateRef<ImportStatement>(name, statements, as, is_file);
 }
 
 

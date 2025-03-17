@@ -60,6 +60,7 @@ private:
 	Ref<Statement> defer_statement();
 	Ref<Statement> label_statement();
 	Ref<Statement> goto_statement();
+	Ref<Statement> import_statement();
 
 private:
 	std::vector<Token> m_tokens;

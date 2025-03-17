@@ -161,5 +161,17 @@ struct GotoStatement : public Statement {
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
 
+struct ImportStatement : public Statement {
+	Token name;
+	std::vector<Ref<Statement>> statements;
+	std::string as;
+	bool is_file;
+
+	ImportStatement(const Token& token, const std::vector<Ref<Statement>>& statements, const std::string& as, bool is_file)
+		: name(token), statements(statements), as(as), is_file(is_file) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
+
 
 }

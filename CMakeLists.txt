@@ -7,8 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-file(GLOB SOURCES "src/*.cpp" "tests/*.cpp")
+file(GLOB SOURCES
+	"src/*.cpp"
+	"tests/*.cpp"
+	"packages/*cpp"
+)
 
 include_directories("src" "tests")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+find_package(raylib REQUIRED)
+target_link_libraries(${PROJECT_NAME} raylib)

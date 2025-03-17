@@ -45,6 +45,7 @@ public:
 	virtual void visit(const ReturnStatement& s)     override;
 	virtual void visit(const ClassStatement& s)      override;
 	virtual void visit(const NamespaceStatement& s)  override;
+	virtual void visit(const ImportStatement& s)     override;
 	virtual void visit(const DeferStatement& s)      override;
 	virtual void visit(const LabelStatement& s)      override;
 	virtual void visit(const GotoStatement& s)       override;

@@ -7,6 +7,7 @@
 #include "expression.h"
 #include "minik.h"
 #include "object.h"
+#include "package.h"
 #include "statement.h"
 #include <unordered_map>
 #include <vector>
@@ -16,6 +17,8 @@ namespace minik {
 class Interpreter : public Visitor {
 public:
 	Interpreter();
+
+	void RegisterPackage(const Ref<Package>& package);
 
 	virtual void visit(const LiteralExpression& e)    override;
 	virtual void visit(const BinaryExpression& e)     override;
@@ -46,6 +49,7 @@ public:
 	virtual void visit(const DeferStatement& s)      override;
 	virtual void visit(const LabelStatement& s)      override;
 	virtual void visit(const GotoStatement& s)       override;
+	virtual void visit(const ImportStatement& s)     override;
 
 	void interpret(const std::vector<Ref<Statement>>& statements);
 
@@ -74,6 +78,8 @@ private:
 	Ref<MinikNamespace> m_namespace = CreateRef<MinikNamespace>("GLOBAL", nullptr);
 	std::unordered_map<const Expression*, int> m_locals = {};
 	Ref<Object> m_result = nullptr;
+
+	std::unordered_map<std::string, Ref<Package>> m_packages;
 friend MinikFunction;
 friend MinikCallable;
 friend MinikClass;

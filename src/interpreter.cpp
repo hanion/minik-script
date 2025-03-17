@@ -6,14 +6,15 @@
 #include "expression.h"
 #include "function.h"
 #include "log.h"
-#include "minik.h"
+#include "package.h"
+#include "resolver.h"
 #include "statement.h"
 #include "token.h"
 #include "callable.h"
 #include <cassert>
 #include <cstddef>
 #include <string>
-#include <chrono>
+#include "../packages/raylib_package.h"
 
 namespace minik {
 
@@ -22,6 +23,12 @@ Interpreter::Interpreter() {
 	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), CreateRef<Object>( CreateRef<mcAssert>() ));
 	m_globals->define(Token(IDENTIFIER, "to_str", {}, 0), CreateRef<Object>( CreateRef<mcToString>() ));
 	m_globals->define(Token(IDENTIFIER, "print",  {}, 0), CreateRef<Object>( CreateRef<mcPrint>() ));
+
+	RegisterPackage(CreateRef<RaylibPackage>());
+}
+
+void Interpreter::RegisterPackage(const Ref<Package>& package) {
+	m_packages.emplace(package->name, package);
 }
 
 
@@ -643,7 +650,10 @@ void Interpreter::collect_predefinition(Statement* s) {
 	} else if (ClassStatement* statement = dynamic_cast<ClassStatement*>(s)) {
 		m_environment->predefine(statement->name, create_class(*statement));
 	} else if (NamespaceStatement* statement = dynamic_cast<NamespaceStatement*>(s)) {
-		m_environment->predefine(statement->name, create_namespace(*statement));
+		Ref<Object> new_ns = create_namespace(*statement);
+		m_environment->predefine(statement->name, new_ns);
+	} else if (ImportStatement* statement = dynamic_cast<ImportStatement*>(s)) {
+		visit(*statement);
 	}
 }
 void Interpreter::collect_predefinitions(const std::vector<Ref<Statement>>& statements) {
@@ -654,6 +664,21 @@ void Interpreter::collect_predefinitions(const std::vector<Ref<Statement>>& stat
 
 void Interpreter::visit(const DeferStatement& s) {
 	s.enclosing_block->deferred_statements.push_back(s.statement);
+}
+
+void Interpreter::visit(const ImportStatement& s) {
+	if (s.is_file) {
+		Resolver resolver = Resolver(*this);
+		resolver.resolve_block(s.statements);
+		collect_predefinitions(s.statements);
+// 		execute_block(statements, m_environment);
+	} else {
+		auto p = m_packages.find(s.name.lexeme);
+		if (p != m_packages.end()) {
+			p->second->ImportPackage(m_environment, s.as);
+		}
+	}
+
 }
 
 
