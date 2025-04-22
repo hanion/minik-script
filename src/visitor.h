@@ -15,6 +15,7 @@ class SetExpression;
 class ThisExpression;
 class SubscriptExpression;
 class ArrayInitializerExpression;
+class ArrayInitSizeExpression;
 class SetSubscriptExpression;
 
 class ExpressionStatement;
@@ -50,6 +51,7 @@ public:
 	virtual void visit(const ThisExpression& e) {}
 	virtual void visit(const SubscriptExpression& e) {}
 	virtual void visit(const ArrayInitializerExpression& e) {}
+	virtual void visit(const ArrayInitSizeExpression& e) {}
 	virtual void visit(const SetSubscriptExpression& e) {}
 
 

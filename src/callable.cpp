@@ -78,7 +78,6 @@ Ref<Object> mcDeepCopy::call(Interpreter& interpreter, const Arguments& argument
 	Ref<Object> cop = CreateRef<Object>(arguments[0]);
 	Ref<Object> a = arguments[0];
 	if (a->is_list()) {
-		printf("aaaa");
 		const List& ol = a->as_list();
 		List nl = List();
 		for (size_t i = 0; i < ol.size(); ++i) {

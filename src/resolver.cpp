@@ -346,6 +346,9 @@ void Resolver::visit(const ArrayInitializerExpression& e) {
 		resolve(element);
 	}
 }
+void Resolver::visit(const ArrayInitSizeExpression& e) {
+	resolve(e.size);
+}
 
 void Resolver::visit(const SetSubscriptExpression& e) {
 	resolve(e.object);

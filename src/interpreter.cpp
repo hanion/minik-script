@@ -230,6 +230,19 @@ void Interpreter::visit(const ArrayInitializerExpression& e) {
 	}
 	m_result = CreateRef<Object>(list);
 }
+void Interpreter::visit(const ArrayInitSizeExpression& e) {
+	auto eval = evaluate(e.size);
+	if (!eval->is_double()) {
+		throw InterpreterException(e.paren, "Array size must be a number.");
+	}
+	size_t size = eval->as_double();
+	List list = {};
+	list.reserve(size);
+	for (size_t i = 0; i < size; ++i) {
+		list.push_back(CreateRef<Object>(0.0));
+	}
+	m_result = CreateRef<Object>(list);
+}
 
 void Interpreter::visit(const SetSubscriptExpression& e) {
 	Ref<Object> object = evaluate(e.object);

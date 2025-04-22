@@ -41,6 +41,7 @@ private:
 	Ref<Expression> call();
 	Ref<Expression> finish_call(const Ref<Expression>& callee);
 	Ref<Expression> array_initializer();
+	Ref<Expression> array_size_initializer();
 
 	void synchronize();
 

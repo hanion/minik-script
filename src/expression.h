@@ -142,6 +142,15 @@ struct ArrayInitializerExpression : public Expression {
 
 	void accept(Visitor& visitor) override { visitor.visit(*this); }
 };
+struct ArrayInitSizeExpression : public Expression {
+	Ref<Expression> size;
+	Token paren;
+
+	ArrayInitSizeExpression(const Ref<Expression>& size, Token paren)
+		: size(size), paren(paren) {}
+
+	void accept(Visitor& visitor) override { visitor.visit(*this); }
+};
 
 struct SetSubscriptExpression : public Expression {
 	Ref<Expression> object;

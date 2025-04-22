@@ -4,23 +4,8 @@ RULE110 :: namespace {
 
 SIZE :: 95;
 
-create_empty_list :: () {
-	return [
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0
-	];
-}
-
 advance_rule :: (buffer: list) {
-	new_buffer := create_empty_list();
+	new_buffer := [SIZE];
 
 	for i := 0; i < SIZE; ++i {
 		a := 0;
@@ -61,7 +46,7 @@ print_buffer :: (buffer: list) {
 }
 
 run :: (amount: int) {
-	arr := create_empty_list();
+	arr := [SIZE];
 	arr[SIZE-1] = 1;
 	print_buffer(arr);
 	for i := 0; i < amount; ++i {
@@ -74,7 +59,7 @@ run :: (amount: int) {
 
 
 Rule110 :: class {
- 	buffer := create_empty_list();
+ 	buffer := [SIZE];
 
 	Rule110 :: () {
 		this.buffer[SIZE-1] = 1;
@@ -101,7 +86,7 @@ Rule110 :: class {
 	}
 
 	advance_rule :: () {
-		new_buffer := create_empty_list();
+		new_buffer := [SIZE];
 
 		for i := 0; i < SIZE; ++i {
 			a := 0;

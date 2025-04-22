@@ -184,8 +184,11 @@ Ref<Expression> Parser::primary() {
 		return CreateRef<GroupingExpression>(expr);
 	}
 
-	if (match(LEFT_BRACKET)) {
+	if (match(LEFT_BRACE)) {
 		return array_initializer();
+	}
+	if (match(LEFT_BRACKET)) {
+		return array_size_initializer();
 	}
 
 	throw ParseException(peek(), "Expected expression.");
@@ -194,15 +197,20 @@ Ref<Expression> Parser::primary() {
 
 Ref<Expression> Parser::array_initializer() {
 	std::vector<Ref<Expression>> elements;
-	// check empty, []
-	if (!check(RIGHT_BRACKET)) {
+	if (!check(RIGHT_BRACE)) {
 		do {
 			elements.push_back(expression());
 		} while (match(COMMA));
 	}
 
-	consume(RIGHT_BRACKET, "Expect ']' after array elements.");
+	consume(RIGHT_BRACE, "Expect '}' after array elements.");
 	return CreateRef<ArrayInitializerExpression>(elements, previous());
+}
+
+Ref<Expression> Parser::array_size_initializer() {
+	Ref<Expression> size = expression();
+	consume(RIGHT_BRACKET, "Expect ']' after array size.");
+	return CreateRef<ArrayInitSizeExpression>(size, previous());
 }
 
 
