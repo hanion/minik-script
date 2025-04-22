@@ -7,6 +7,7 @@
 #include "object.h"
 #include "token.h"
 #include <chrono>
+#include <cmath>
 
 namespace minik {
 
@@ -73,4 +74,18 @@ Ref<Object> mcPrint::call(Interpreter& interpreter, const Arguments& arguments) 
 	return CreateRef<Object>(str);
 }
 
+Ref<Object> mcDeepCopy::call(Interpreter& interpreter, const Arguments& arguments) {
+	Ref<Object> cop = CreateRef<Object>(arguments[0]);
+	Ref<Object> a = arguments[0];
+	if (a->is_list()) {
+		printf("aaaa");
+		const List& ol = a->as_list();
+		List nl = List();
+		for (size_t i = 0; i < ol.size(); ++i) {
+			nl.push_back(CreateRef<Object>(ol[i]));
+		}
+		cop->value = nl;
+	}
+	return cop;
 }
+

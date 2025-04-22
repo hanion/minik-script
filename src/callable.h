@@ -50,5 +50,12 @@ public:
 	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
 };
 
+class mcDeepCopy : public MinikCallable {
+public:
+	virtual int arity() override { return 1; }
+	virtual std::string to_string() const override { return "<fn native deep_copy>"; }
+	virtual Ref<Object> call(Interpreter& interpreter, const Arguments& arguments) override;
+};
+
 }
 

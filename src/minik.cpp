@@ -15,12 +15,14 @@ namespace minik {
 
 static bool had_error = false;
 static bool had_runtime_error = false;
-Interpreter interpreter;
 
 
 void run(const std::string& source) {
+	Interpreter interpreter;
+
 	Lexer lexer = Lexer(source);
 	std::vector<Token>& tokens = lexer.scan_tokens();
+
 	Parser parser = Parser(tokens);
 	std::vector<Ref<Statement>> statements = parser.parse();
 
@@ -45,7 +47,7 @@ void run_file(const std::string& filename) {
 		return;
 	}
 
-	interpreter = Interpreter();
+	Interpreter interpreter = Interpreter();
 
 	std::string source = std::string(
 		(std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()

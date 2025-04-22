@@ -19,10 +19,11 @@
 namespace minik {
 
 Interpreter::Interpreter() {
-	m_globals->define(Token(IDENTIFIER, "clock", {}, 0), CreateRef<Object>( CreateRef<mcClock>() ));
+	m_globals->define(Token(IDENTIFIER, "clock",  {}, 0), CreateRef<Object>( CreateRef<mcClock>() ));
 	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), CreateRef<Object>( CreateRef<mcAssert>() ));
 	m_globals->define(Token(IDENTIFIER, "to_str", {}, 0), CreateRef<Object>( CreateRef<mcToString>() ));
 	m_globals->define(Token(IDENTIFIER, "print",  {}, 0), CreateRef<Object>( CreateRef<mcPrint>() ));
+	m_globals->define(Token(IDENTIFIER, "deep_copy",   {}, 0), CreateRef<Object>( CreateRef<mcDeepCopy>() ));
 
 	RegisterPackage(CreateRef<RaylibPackage>());
 }

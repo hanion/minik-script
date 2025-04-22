@@ -11,7 +11,8 @@ namespace minik {
 
 class Parser {
 public:
-	Parser(const std::vector<Token>& tokens) : m_tokens(tokens) {}
+	Parser(const std::vector<Token>& tokens)
+		: m_tokens(tokens) {}
 
 	std::vector<Ref<Statement>> parse();
 
