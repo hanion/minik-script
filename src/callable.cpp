@@ -48,7 +48,15 @@ Ref<Object> mcAssert::call(Interpreter& interpreter, const Arguments& arguments)
 }
 
 Ref<Object> mcToString::call(Interpreter& interpreter, const Arguments& arguments) {
-	return CreateRef<Object>(arguments[0]->to_string());
+	const auto& a = arguments[0];
+	if (a->is_double()) {
+		double d = a->as_double();
+		if (d == (int)d) {
+			return CreateRef<Object>(std::to_string((int)d));
+		}
+		return CreateRef<Object>(to_string());
+	}
+	return CreateRef<Object>(a->to_string());
 }
 
 Ref<Object> mcPrint::call(Interpreter& interpreter, const Arguments& arguments) {
@@ -88,3 +96,4 @@ Ref<Object> mcDeepCopy::call(Interpreter& interpreter, const Arguments& argument
 	return cop;
 }
 
+}

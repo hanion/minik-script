@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <string>
 #include "../packages/raylib_package.h"
+#include "../packages/math_package.h"
 
 namespace minik {
 
@@ -26,6 +27,7 @@ Interpreter::Interpreter() {
 	m_globals->define(Token(IDENTIFIER, "deep_copy",   {}, 0), CreateRef<Object>( CreateRef<mcDeepCopy>() ));
 
 	RegisterPackage(CreateRef<RaylibPackage>());
+	RegisterPackage(CreateRef<MathPackage>());
 }
 
 void Interpreter::RegisterPackage(const Ref<Package>& package) {

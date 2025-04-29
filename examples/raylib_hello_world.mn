@@ -1,0 +1,10 @@
+
+import Raylib;
+Raylib.InitWindow(300, 100, "window");
+while !Raylib.WindowShouldClose() {
+	Raylib.BeginDrawing();
+	Raylib.DrawText(85, 25, "Hello, World!");
+	Raylib.EndDrawing();
+}
+Raylib.CloseWindow();
+
