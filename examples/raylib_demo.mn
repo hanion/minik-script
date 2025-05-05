@@ -49,7 +49,7 @@ RunRaylibDemo :: () {
 		ball.pos.y = ball.pos.y + ball.speed.y;
 
 		Raylib.DrawCircle(ball.pos.x, ball.pos.y, ball.radius, ball.color);
-		Raylib.DrawText(10, 10, "Bouncing Circle");
+		Raylib.DrawText(10, 10, 40, "Bouncing Circle");
 
 		Raylib.EndDrawing();
 	}

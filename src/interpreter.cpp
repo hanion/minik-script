@@ -16,6 +16,7 @@
 #include <string>
 #include "../packages/raylib_package.h"
 #include "../packages/math_package.h"
+#include "../packages/list_package.h"
 
 namespace minik {
 
@@ -24,10 +25,10 @@ Interpreter::Interpreter() {
 	m_globals->define(Token(IDENTIFIER, "assert", {}, 0), CreateRef<Object>( CreateRef<mcAssert>() ));
 	m_globals->define(Token(IDENTIFIER, "to_str", {}, 0), CreateRef<Object>( CreateRef<mcToString>() ));
 	m_globals->define(Token(IDENTIFIER, "print",  {}, 0), CreateRef<Object>( CreateRef<mcPrint>() ));
-	m_globals->define(Token(IDENTIFIER, "deep_copy",   {}, 0), CreateRef<Object>( CreateRef<mcDeepCopy>() ));
 
 	RegisterPackage(CreateRef<RaylibPackage>());
 	RegisterPackage(CreateRef<MathPackage>());
+	RegisterPackage(CreateRef<ListPackage>());
 }
 
 void Interpreter::RegisterPackage(const Ref<Package>& package) {
